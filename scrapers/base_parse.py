@@ -24,10 +24,6 @@ class BaseParse(object):
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
-    @property
-    def htbn_link(self):
-        return self.__htbn_link
-
     @htbn_link.setter
     def htbn_link(self, value):
         """Setter for htbn link
