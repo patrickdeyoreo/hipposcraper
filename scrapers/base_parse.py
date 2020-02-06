@@ -72,7 +72,8 @@ class BaseParse(object):
         """
         with requests.Session() as session:
             auth_url = 'https://intranet.hbtn.io/auth/sign_in'
-            soup = BeautifulSoup(session.get(auth_url).content)
+            resp = session.get(auth_url)
+            soup = BeautifulSoup(resp.content, features='html.parser')
             sys.stdout.write("  -> Logging in... ")
             try:
                 auth_data = {
@@ -90,7 +91,8 @@ class BaseParse(object):
                     )['value'],
                 }
                 session.post(auth_url, data=auth_data)
-                soup = BeautifulSoup(session.get(self.hbtn_link).content)
+                resp = session.get(self.hbtn_link)
+                soup = BeautifulSoup(resp.content, features='html.parser')
             except AttributeError:
                 print("[ERROR] Login failed (are your credentials correct?")
                 sys.exit()
