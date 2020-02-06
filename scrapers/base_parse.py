@@ -35,7 +35,7 @@ class BaseParse(object):
         """
         valid_link = "intranet.hbtn.io/projects"
         while valid_link not in value:
-            print("[ERROR] Invalid link (must be  intranet.hbtn.io)")
+            print("[ERROR] Invalid link (must be on intranet.hbtn.io)")
             value = input("Enter link to project: ")
         self.htbn_link = value
 
@@ -63,26 +63,36 @@ class BaseParse(object):
         """
         login = "https://intranet.hbtn.io/auth/sign_in"
         cj = cookielib.CookieJar()
-        br = mechanize.Browser()
-
-        sys.stdout.write("  -> Logging in... ")
-        try:
-            br.set_cookiejar(cj)
-            br.open(login)
-            br.select_form(nr=0)
-            br.form['user[login]'] = self.json_data["intra_user_key"]
-            br.form['user[password]'] = self.json_data["intra_pass_key"]
-            br.submit()
-            page = br.open(self.__htbn_link)
-        except AttributeError:
-            print("[ERROR] Login failed - are your auth_data credentials correct?")
-            sys.exit()
-
+        with requests.Session() as session:
+            auth = {
+                'url': 'https://intranet.hbtn.io/auth/sign_in',
+                'data': {
+                    'user[login]': self.json_data.get(
+                        'intra_user_key'
+                    ),
+                    'user[password]': self.json_data.get(
+                        'intra_pass_key'
+                    ),
+                },
+            }
+            soup = BeautifulSoup(session.get(auth_url).content)
+            sys.stdout.write("  -> Logging in... ")
+            try:
+                keys = [
+                    'authenticity_token',
+                    'commit',
+                ]
+                auth['data']['authenticity_token'] = soup.find(
+                    'input', {'name': 'authenticity_token'})['value']
+                auth['data']['commit'] = soup.find(
+                    'input', {'name': 'commit'})['value']
+                session.post(**auth)
+                soup = BeautifulSoup(session.get(self.htbn_link).content)
+            except AttributeError:
+                print("[ERROR] Login failed (are your credentials correct?")
+                sys.exit()
         print("done")
-        self.soup = BeautifulSoup(page, 'html.parser')
-        br.close()
-        del page
-        return self.soup
+        return soup
 
     def find_directory(self):
         """Method that scrapes for project's directory name

@@ -4,8 +4,6 @@ import re
 import string
 import json
 import urllib
-import cookielib
-import mechanize
 from bs4 import BeautifulSoup
 from base_parse import BaseParse
 from low_scraper import LowScraper
