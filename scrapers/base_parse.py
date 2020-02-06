@@ -19,14 +19,23 @@ class BaseParse(object):
     """
 
     def __init__(self, link=""):
-        self.htbn_link = link
+        self.hbtn_link = link
         self.json_data = self.get_json()
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
-    @htbn_link.setter
-    def htbn_link(self, value):
-        """Setter for htbn link
+    @property
+    def hbtn_link(self):
+        """Getter for hbtn link
+
+        Returns:
+            hbtn_link (str): value of the corresponding private attribute
+        """
+        return self.__hbtn_link
+
+    @hbtn_link.setter
+    def hbtn_link(self, value):
+        """Setter for hbtn link
 
         Must contain holberton's url format for projects.
 
@@ -37,7 +46,7 @@ class BaseParse(object):
         while valid_link not in value:
             print("[ERROR] Invalid link (must be on intranet.hbtn.io)")
             value = input("Enter link to project: ")
-        self.htbn_link = value
+        self.__hbtn_link = value
 
     def get_json(self):
         """Method that reads auth_data.json.
@@ -53,7 +62,7 @@ class BaseParse(object):
             sys.exit()
 
     def get_soup(self):
-        """Method that parses the `htbn_link` with BeautifulSoup
+        """Method that parses the `hbtn_link` with BeautifulSoup
 
         Initially logs in the intranet using mechanize and cookiejar.
         Then requests for the html of the link, and sets it into `soup`.
@@ -61,33 +70,27 @@ class BaseParse(object):
         Returns:
             soup (obj): BeautifulSoup parsed html object
         """
-        login = "https://intranet.hbtn.io/auth/sign_in"
-        cj = cookielib.CookieJar()
         with requests.Session() as session:
-            auth = {
-                'url': 'https://intranet.hbtn.io/auth/sign_in',
-                'data': {
+            auth_url = 'https://intranet.hbtn.io/auth/sign_in'
+            soup = BeautifulSoup(session.get(auth_url).content)
+            sys.stdout.write("  -> Logging in... ")
+            try:
+                auth_data = {
                     'user[login]': self.json_data.get(
                         'intra_user_key'
                     ),
                     'user[password]': self.json_data.get(
                         'intra_pass_key'
                     ),
-                },
-            }
-            soup = BeautifulSoup(session.get(auth_url).content)
-            sys.stdout.write("  -> Logging in... ")
-            try:
-                keys = [
-                    'authenticity_token',
-                    'commit',
-                ]
-                auth['data']['authenticity_token'] = soup.find(
-                    'input', {'name': 'authenticity_token'})['value']
-                auth['data']['commit'] = soup.find(
-                    'input', {'name': 'commit'})['value']
-                session.post(**auth)
-                soup = BeautifulSoup(session.get(self.htbn_link).content)
+                    'authenticity_token': soup.find(
+                        'input', {'name': 'authenticity_token'}
+                    )['value'],
+                    'commit': soup.find(
+                        'input', {'name': 'commit'}
+                    )['value'],
+                }
+                session.post(auth_url, data=auth_data)
+                soup = BeautifulSoup(session.get(self.hbtn_link).content)
             except AttributeError:
                 print("[ERROR] Login failed (are your credentials correct?")
                 sys.exit()
