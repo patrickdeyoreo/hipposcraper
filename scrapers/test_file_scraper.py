@@ -56,7 +56,7 @@ class TestFileScraper:
                         if find_html != -1:
                             w_test_file.write(text[i])
                         else:
-                            w_test_file.write(text[i].encode('utf-8') + "\n")
+                            w_test_file.write(text[i] + '\n')
                     w_test_file.close()
                 except (AttributeError, IndexError):
                     name = item.text
