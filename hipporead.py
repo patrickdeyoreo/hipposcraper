@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Main entry point for hipporead
 
 Usage:
@@ -25,6 +25,7 @@ def get_args():
 
     link = sys.argv[1]
     return link
+
 
 def hipporead():
     """Entry point for hipporeader
@@ -57,6 +58,7 @@ def hipporead():
     r_scraper.write_footer(author, user, git_link)
 
     print("README.md all set!")
+
 
 if __name__ == "__main__":
     hipporead()

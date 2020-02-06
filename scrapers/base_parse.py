@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for BaseParse"""
 from scrapers import *
 
@@ -38,10 +38,10 @@ class BaseParse(object):
             value (str): comes from argv[1] as the project link
         """
         valid_link = "intranet.hbtn.io/projects"
-        while not (valid_link in value):
-            print("[ERROR] Invalid link (must be to project on intranet.hbtn.io)")
-            value = raw_input("Enter link to project: ")
-        self.__htbn_link = value
+        while valid_link not in value:
+            print("[ERROR] Invalid link (must be  intranet.hbtn.io)")
+            value = input("Enter link to project: ")
+        self.htbn_link = value
 
     def get_json(self):
         """Method that reads auth_data.json.

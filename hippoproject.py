@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Main entry point for hippoproject
 
 Usage:
@@ -26,6 +26,7 @@ def get_args():
     link = sys.argv[1]
     return link
 
+
 def set_permissions():
     """Method that sets permissions on files"""
     sys.stdout.write("  -> Setting permissions... ")
@@ -34,14 +35,14 @@ def set_permissions():
         print("done")
     except OSError:
         print("[ERROR] Failed to set permissions")
-    
+
+
 def hippoproject():
     """Entry point for hippoproject
 
     Scrapes project type (low level, high level, or system engineer),
     then it checks project type to execute appropriate scrapes.
     """
-
     link = get_args()
 
     print("\nHipposcraper version 1.1.1")
@@ -93,6 +94,7 @@ def hippoproject():
 
     set_permissions()
     print("Project all set!")
+
 
 if __name__ == "__main__":
     hippoproject()
