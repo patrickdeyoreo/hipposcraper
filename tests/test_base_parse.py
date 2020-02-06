@@ -1,7 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Unittest for LowScraper"""
 import unittest
 from scrapers import *
+
 
 class TestBaseParse(unittest.TestCase):
     """Test for LowScraper"""

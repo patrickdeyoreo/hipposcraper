@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for ReadScraper"""
 from scrapers import *
 from bs4 import Comment
