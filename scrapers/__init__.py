@@ -3,7 +3,7 @@ import sys
 import re
 import string
 import json
-import urllib2
+import urllib
 import cookielib
 import mechanize
 from bs4 import BeautifulSoup
