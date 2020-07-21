@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Module for TestFileScraper"""
-from scrapers import *
+import json
+import re
+import sys
+
 
 class TestFileScraper:
     """TestFileScraper class

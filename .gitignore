@@ -1,2 +1,24 @@
-auth_data.json
-*.pyc
+# blacklist everything
+*
+
+# whitelist directories
+!*/
+
+# whitelist files as needed
+!README.*
+!.gitignore
+!/hipposcrape/**
+!/hipposcrape.py
+!/requirements.txt
+!/setup.sh
+!/tests/**
+
+# blacklist remaining "lint"
+.DS_Store
+.tags
+.vscode
+*.py[cod]
+*.o
+*.so
+*.sw[op]
+*~

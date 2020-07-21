@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Module for BaseParse"""
-from scrapers import *
+import json
+import os
+import re
+import sys
+
+from bs4 import BeautifulSoup
+import requests
 
 
 class BaseParse(object):
-    """BaseParse class
-
+    """
     Contains read json data, and parsed html data for the scrapers
     to use. Also contains general methods to initialize the scrape.
 
@@ -53,8 +58,9 @@ class BaseParse(object):
 
         Sets json read to `json_data`
         """
-        super_path = os.path.dirname(os.path.abspath(__file__))
+        super_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         try:
+            print("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]))
             with open("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]), "r") as json_file:
                 return json.load(json_file)
         except IOError:
@@ -64,7 +70,6 @@ class BaseParse(object):
     def get_soup(self):
         """Method that parses the `hbtn_link` with BeautifulSoup
 
-        Initially logs in the intranet using mechanize and cookiejar.
         Then requests for the html of the link, and sets it into `soup`.
 
         Returns:
@@ -112,7 +117,7 @@ class BaseParse(object):
         """Method that creates appropriate directory"""
         sys.stdout.write("  -> Creating directory... ")
         try:
-            os.mkdir(self.dir_name)
+            os.makedirs(self.dir_name, mode=0o755, exist_ok=False)
             os.chdir(self.dir_name)
             print("done")
         except OSError:
