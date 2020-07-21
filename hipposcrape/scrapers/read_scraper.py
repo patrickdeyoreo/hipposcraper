@@ -64,7 +64,7 @@ class ReadScraper:
         try:
             h2 = self.soup.find("h2", string=re.compile("Learning Objectives"))
             lu = h2.find_next("h3").next_element.next_element.next_element
-            txt= lu.text
+            txt = lu.text
             return txt.splitlines()
         except AttributeError:
             print("[ERROR] Failed to scrape learning objectives")
@@ -133,7 +133,7 @@ class ReadScraper:
                 url = item['href']
                 name = item.text
                 if (url.startswith('/rltoken/')):
-                    url = 'https://intranet.hbtn.io'+ url
+                    url = 'https://intranet.hbtn.io' + url
                 urls.append(url)
                 names.append(name)
             links = [names, urls]
@@ -180,8 +180,9 @@ class ReadScraper:
 
     def write_tasks(self):
         """Method that writes the entire tasks to README.md"""
-        if (self.task_names is not None and self.file_names is not None and
-            self.task_info is not None):
+        if not (self.task_names is None or
+                self.file_names is None or
+                self.task_info is None):
             sys.stdout.write("  -> Writing task information... ")
             count = 0
             while count < len(self.task_names):
@@ -232,4 +233,3 @@ class ReadScraper:
             pass
         self.readme.write("\n")
         self.readme.write("---\n")
-
