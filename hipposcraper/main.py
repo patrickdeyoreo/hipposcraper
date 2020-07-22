@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Provides the main entry point for the hipposcrape module."""
+"""Provides the main entry point for the hipposcraper module."""
 import sys
 
 from . hippodir import hippodir

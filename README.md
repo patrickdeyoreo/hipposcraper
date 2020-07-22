@@ -62,14 +62,14 @@ The Hipposcraper defines two separate Python scripts - one
 ([hippoproject.py](./hippoproject.py)) that creates projects, 
 and a second ([hipporead.py](./hipporead.py)) that creates 
 `README.md` files. To run both simultaneously, you'll need to define an alias 
-to the script [hipposcrape.sh](./hipposcrape.sh).
+to the script [hipposcraper.sh](./hipposcraper.sh).
 
 First, open the script and enter the full pathname to the Hipposcraper 
 directory where directed. Then, if you work in a Bash shell, define the 
 following in your `.bashrc`:
 
 ```
-alias hipposcrape='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcrape.sh'
+alias hipposcraper='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcraper.sh'
 ```
 
 Alternatievely, you can define separate aliases for each individual script. To 
@@ -96,7 +96,7 @@ After you have setup the proper aliases, you can run the Hipposcraper with the
 following command:
 
 ```
-~$ hipposcrape project_link
+~$ hipposcraper project_link
 ```
 
 Where `project_link` is the URL link to the Holberton School project to scrape.

@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-"""Test hipposcrape."""
+"""Test hipposcraper."""
 
 URL = "https://intranet.hbtn.io/projects/232"

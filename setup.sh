@@ -51,15 +51,15 @@ then
     sed -i "s,YOUR_GITHUB_PROFILE_LINK,$github_link,g" auth_data.json
 fi
 
-if grep -q ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE hipposcrape.sh
+if grep -q ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE hipposcraper.sh
 then
-    sed -i "s/ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE/$(pwd)/g" hipposcrape.sh
+    sed -i "s/ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE/$(pwd)/g" hipposcraper.sh
 fi
 
 echo "Setting aliases:"
 if ! grep -q hippoproject ~/.bashrc || \
    ! grep -q hipporead  ~/.bashrc || \
-   ! grep -q hipposcrape ~/.bashrc
+   ! grep -q hipposcraper ~/.bashrc
 then
     echo -e "\n# Hipposcraper aliases" >> ~/.bashrc
 fi
@@ -82,13 +82,13 @@ else
     echo "  -> hipporead already defined"
 fi
 
-if ! grep -q hipposcrape.sh ~/.bashrc
+if ! grep -q hipposcraper.sh ~/.bashrc
 then
-    scrape_alias="alias hipposcrape='python3 $(pwd)/hipposcrape.sh'"
+    scrape_alias="alias hipposcraper='python3 $(pwd)/hipposcraper.sh'"
     echo "$scrape_alias" >> ~/.bashrc
     echo "  -> $scrape_alias"
 else
-    echo "  -> hipposcrape already defined"
+    echo "  -> hipposcraper already defined"
 fi
 
 echo "Reloading .bashrc:"
