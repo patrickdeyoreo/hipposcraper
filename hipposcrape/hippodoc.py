@@ -4,8 +4,8 @@ hippodoc entry point
 usage: hippodoc.py URL ...
 """
 import sys
-from . scrapers import BaseParse
-from . scrapers import ReadScraper
+
+from . import scrapers
 
 
 def get_args():
@@ -38,11 +38,11 @@ def hippodoc():
 
     print("\nHipposcraper version 1.1.1")
     print("Creating README.md file:")
-    parse_data = BaseParse(link)
+    parse_data = scrapers.BaseParse(link)
 
     sys.stdout.write("  -> Scraping information... ")
     # Creating scraping object
-    r_scraper = ReadScraper(parse_data.soup)
+    r_scraper = scrapers.ReadScraper(parse_data.soup)
 
     print("done")
 

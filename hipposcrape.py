@@ -10,4 +10,4 @@ import hipposcrape
 
 
 if __name__ == '__main__':
-        sys.exit(hipposcrape.main())
+    sys.exit(hipposcrape.main())

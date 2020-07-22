@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Main entry point for hippodir
-
-Usage:
-    `./hippodir.py https://intranet.hbtn.io/projects/232`
+"""
+hippodir entry point
+usage: hippodir.py URL ...
 """
 import os
 import sys

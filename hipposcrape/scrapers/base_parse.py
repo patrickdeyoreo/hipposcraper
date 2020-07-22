@@ -60,7 +60,6 @@ class BaseParse(object):
         """
         super_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         try:
-            print("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]))
             with open("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]), "r") as json_file:
                 return json.load(json_file)
         except IOError:
