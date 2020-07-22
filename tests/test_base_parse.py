@@ -3,7 +3,7 @@
 import unittest
 
 from . import URL
-from hipposcrape import scrapers
+from hipposcraper import scrapers
 
 
 class TestBaseParse(unittest.TestCase):
