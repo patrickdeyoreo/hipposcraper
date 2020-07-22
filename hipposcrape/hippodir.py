@@ -1,10 +1,12 @@
-#!/usr/bin/env python2
-"""Main entry point for hippoproject
-
-Usage:
-    `./hippoproject.py https://intranet.hbtn.io/projects/232`
+#!/usr/bin/env python3
 """
-from scrapers import *
+hippodir entry point
+usage: hippodir.py URL ...
+"""
+import os
+import sys
+
+from . import scrapers
 
 
 def get_args():
@@ -26,6 +28,7 @@ def get_args():
     link = sys.argv[1]
     return link
 
+
 def set_permissions():
     """Method that sets permissions on files"""
     sys.stdout.write("  -> Setting permissions... ")
@@ -34,19 +37,19 @@ def set_permissions():
         print("done")
     except OSError:
         print("[ERROR] Failed to set permissions")
-    
-def hippoproject():
-    """Entry point for hippoproject
+
+
+def hippodir():
+    """Entry point for hippodir
 
     Scrapes project type (low level, high level, or system engineer),
     then it checks project type to execute appropriate scrapes.
     """
-
     link = get_args()
 
     print("\nHipposcraper version 1.1.1")
     print("Creating project:")
-    parse_data = BaseParse(link)
+    parse_data = scrapers.BaseParse(link)
 
     parse_data.find_directory()
     parse_data.create_directory()
@@ -54,8 +57,8 @@ def hippoproject():
     project_type = parse_data.project_type_check()
     if "high" in project_type:
         # Creating scraping objects
-        hi_scraper = HighScraper(parse_data.soup)
-        t_scraper = TestFileScraper(parse_data.soup)
+        hi_scraper = scrapers.HighScraper(parse_data.soup)
+        t_scraper = scrapers.TestFileScraper(parse_data.soup)
 
         # Writing to files with scraped data
         hi_scraper.write_files()
@@ -65,8 +68,21 @@ def hippoproject():
 
     elif "low" in project_type:
         # Creating scraping objects
-        lo_scraper = LowScraper(parse_data.soup)
-        t_scraper = TestFileScraper(parse_data.soup)
+        lo_scraper = scrapers.LowScraper(parse_data.soup)
+        t_scraper = scrapers.TestFileScraper(parse_data.soup)
+
+        # Writing to files with scraped data
+        lo_scraper.write_putchar()
+        lo_scraper.write_header()
+        lo_scraper.write_files()
+
+        # Creating test (main) files
+        t_scraper.write_test_files()
+
+    elif "linux" in project_type:
+        # Creating scraping objects
+        lo_scraper = scrapers.LowScraper(parse_data.soup)
+        t_scraper = scrapers.TestFileScraper(parse_data.soup)
 
         # Writing to files with scraped data
         lo_scraper.write_putchar()
@@ -78,8 +94,8 @@ def hippoproject():
 
     elif "system" in project_type:
         # Creating scraping objects
-        sy_scraper = SysScraper(parse_data.soup)
-        t_scraper = TestFileScraper(parse_data.soup)
+        sy_scraper = scrapers.SysScraper(parse_data.soup)
+        t_scraper = scrapers.TestFileScraper(parse_data.soup)
 
         # Creating test (main) files
         t_scraper.write_test_files()
@@ -94,5 +110,6 @@ def hippoproject():
     set_permissions()
     print("Project all set!")
 
+
 if __name__ == "__main__":
-    hippoproject()
+    hippodir()

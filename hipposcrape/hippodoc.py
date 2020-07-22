@@ -1,10 +1,11 @@
-#!/usr/bin/env python2
-"""Main entry point for hipporead
-
-Usage:
-    `./hipporead.py https://intranet.hbtn.io/projects/232`
+#!/usr/bin/env python3
 """
-from scrapers import *
+hippodoc entry point
+usage: hippodoc.py URL ...
+"""
+import sys
+
+from . import scrapers
 
 
 def get_args():
@@ -26,7 +27,8 @@ def get_args():
     link = sys.argv[1]
     return link
 
-def hipporead():
+
+def hippodoc():
     """Entry point for hipporeader
 
     Scrapes for specific text to create a README automatically.
@@ -36,11 +38,11 @@ def hipporead():
 
     print("\nHipposcraper version 1.1.1")
     print("Creating README.md file:")
-    parse_data = BaseParse(link)
+    parse_data = scrapers.BaseParse(link)
 
     sys.stdout.write("  -> Scraping information... ")
     # Creating scraping object
-    r_scraper = ReadScraper(parse_data.soup)
+    r_scraper = scrapers.ReadScraper(parse_data.soup)
 
     print("done")
 
@@ -59,5 +61,6 @@ def hipporead():
 
     print("README.md all set!")
 
+
 if __name__ == "__main__":
-    hipporead()
+    hippodoc()

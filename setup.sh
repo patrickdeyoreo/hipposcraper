@@ -66,7 +66,7 @@ fi
 
 if ! grep -q hippoproject.py ~/.bashrc
 then
-    project_alias="alias hippoproject='python2 $(pwd)/hippoproject.py'"
+    project_alias="alias hippoproject='python3 $(pwd)/hippoproject.py'"
     echo "$project_alias" >> ~/.bashrc
     echo "  -> $project_alias"
 else
@@ -75,7 +75,7 @@ fi
 
 if ! grep -q hipporead.py ~/.bashrc
 then
-  read_alias="alias hipporead='python2 $(pwd)/hipporead.py'"
+  read_alias="alias hipporead='python3 $(pwd)/hipporead.py'"
     echo "$read_alias" >> ~/.bashrc
     echo "  -> $read_alias"
 else
@@ -84,7 +84,7 @@ fi
 
 if ! grep -q hipposcrape.sh ~/.bashrc
 then
-    scrape_alias="alias hipposcrape='python2 $(pwd)/hipposcrape.sh'"
+    scrape_alias="alias hipposcrape='python3 $(pwd)/hipposcrape.sh'"
     echo "$scrape_alias" >> ~/.bashrc
     echo "  -> $scrape_alias"
 else

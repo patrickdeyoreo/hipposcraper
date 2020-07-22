@@ -1,6 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for LowScraper"""
-from scrapers import *
+import json
+import re
+import sys
 
 
 class LowScraper:

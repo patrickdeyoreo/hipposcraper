@@ -1,13 +1,16 @@
-#!/usr/bin/env python2
-"""Unittest for LowScraper"""
+#!/usr/bin/env python3
+"""Provide tests for BaseParse"""
 import unittest
-from scrapers import *
+
+from . import URL
+from hipposcrape import scrapers
+
 
 class TestBaseParse(unittest.TestCase):
-    """Test for LowScraper"""
+    """Test BaseParse"""
 
     def setUp(self):
-        self.parse = BaseParse("https://intranet.hbtn.io/projects/232")
+        self.parse = scrapers.BaseParse(URL)
         self.parse.get_json()
 
     def tearDown(self):
@@ -16,7 +19,7 @@ class TestBaseParse(unittest.TestCase):
     def test_base_object(self):
         self.assertIsNotNone(self.parse)
         self.assertIsInstance(self.parse, object)
-        self.assertIn("scrapers.base_parse.BaseParse", str(self.parse))
+        self.assertIn("scrapers.BaseParse", str(self.parse))
 
     def test_json_data(self):
         self.assertIsInstance(self.parse.json_data, dict)

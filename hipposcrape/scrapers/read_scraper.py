@@ -1,6 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for ReadScraper"""
-from scrapers import *
+import json
+import re
+import sys
+
 from bs4 import Comment
 
 
@@ -61,7 +64,7 @@ class ReadScraper:
         try:
             h2 = self.soup.find("h2", string=re.compile("Learning Objectives"))
             lu = h2.find_next("h3").next_element.next_element.next_element
-            txt= lu.text
+            txt = lu.text
             return txt.splitlines()
         except AttributeError:
             print("[ERROR] Failed to scrape learning objectives")
@@ -110,7 +113,7 @@ class ReadScraper:
             for comments in info_list:
                 if comments == " Task Body ":
                     info_text = comments.next_element.next_element.text
-                    temp.append(info_text.encode('utf-8'))
+                    temp.append(info_text)
             return temp
         except (IndexError, AttributeError):
             print("[ERROR] Failed to scrape task descriptions")
@@ -130,7 +133,7 @@ class ReadScraper:
                 url = item['href']
                 name = item.text
                 if (url.startswith('/rltoken/')):
-                    url = 'https://intranet.hbtn.io'+ url
+                    url = 'https://intranet.hbtn.io' + url
                 urls.append(url)
                 names.append(name)
             links = [names, urls]
@@ -165,11 +168,11 @@ class ReadScraper:
         try:
             for item in self.prj_info:
                 if len(item) == 0:
-                    self.readme.write("{}\n".format(item.encode('utf-8')))
+                    self.readme.write("{}\n".format(item))
                     continue
-                self.readme.write("* {}\n".format(item.encode('utf-8')))
+                self.readme.write("* {}\n".format(item))
             print("done")
-        except (AttributeError, IndexError, UnicodeEncodeError):
+        except (AttributeError, IndexError):
             print("\n     [ERROR] Failed to write learning objectives.")
             pass
         self.readme.write("\n")
@@ -177,8 +180,9 @@ class ReadScraper:
 
     def write_tasks(self):
         """Method that writes the entire tasks to README.md"""
-        if (self.task_names is not None and self.file_names is not None and
-            self.task_info is not None):
+        if not (self.task_names is None or
+                self.file_names is None or
+                self.task_info is None):
             sys.stdout.write("  -> Writing task information... ")
             count = 0
             while count < len(self.task_names):
@@ -217,16 +221,15 @@ class ReadScraper:
             l = len(a[0])
             for idx in range(l):
                 if len(a[0][idx]) == 0:
-                    self.readme.write("{}".format(a[0][idx].encode('utf-8')))
-                    self.readme.write("{}\n".format(a[1][idx].encode('utf-8')))
+                    self.readme.write("{}".format(a[0][idx]))
+                    self.readme.write("{}\n".format(a[1][idx]))
                     continue
-                self.readme.write("* [{}]".format(a[0][idx].encode('utf-8')))
-                self.readme.write("({})\n".format(a[1][idx].encode('utf-8')))
+                self.readme.write("* [{}]".format(a[0][idx]))
+                self.readme.write("({})\n".format(a[1][idx]))
 
             print("done")
-        except (AttributeError, IndexError, UnicodeEncodeError):
+        except (AttributeError, IndexError):
             print("\n     [ERROR] Failed to write resources.")
             pass
         self.readme.write("\n")
         self.readme.write("---\n")
-

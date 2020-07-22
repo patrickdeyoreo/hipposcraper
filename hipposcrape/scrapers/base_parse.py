@@ -1,11 +1,16 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for BaseParse"""
-from scrapers import *
+import json
+import os
+import re
+import sys
+
+from bs4 import BeautifulSoup
+import requests
 
 
 class BaseParse(object):
-    """BaseParse class
-
+    """
     Contains read json data, and parsed html data for the scrapers
     to use. Also contains general methods to initialize the scrape.
 
@@ -19,18 +24,23 @@ class BaseParse(object):
     """
 
     def __init__(self, link=""):
-        self.htbn_link = link
+        self.hbtn_link = link
         self.json_data = self.get_json()
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
     @property
-    def htbn_link(self):
-        return self.__htbn_link
+    def hbtn_link(self):
+        """Getter for hbtn link
 
-    @htbn_link.setter
-    def htbn_link(self, value):
-        """Setter for htbn link
+        Returns:
+            hbtn_link (str): value of the corresponding private attribute
+        """
+        return self.__hbtn_link
+
+    @hbtn_link.setter
+    def hbtn_link(self, value):
+        """Setter for hbtn link
 
         Must contain holberton's url format for projects.
 
@@ -38,17 +48,17 @@ class BaseParse(object):
             value (str): comes from argv[1] as the project link
         """
         valid_link = "intranet.hbtn.io/projects"
-        while not (valid_link in value):
-            print("[ERROR] Invalid link (must be to project on intranet.hbtn.io)")
-            value = raw_input("Enter link to project: ")
-        self.__htbn_link = value
+        while valid_link not in value:
+            print("[ERROR] Invalid link (must be on intranet.hbtn.io)")
+            value = input("Enter link to project: ")
+        self.__hbtn_link = value
 
     def get_json(self):
         """Method that reads auth_data.json.
 
         Sets json read to `json_data`
         """
-        super_path = os.path.dirname(os.path.abspath(__file__))
+        super_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         try:
             with open("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]), "r") as json_file:
                 return json.load(json_file)
@@ -57,36 +67,41 @@ class BaseParse(object):
             sys.exit()
 
     def get_soup(self):
-        """Method that parses the `htbn_link` with BeautifulSoup
+        """Method that parses the `hbtn_link` with BeautifulSoup
 
-        Initially logs in the intranet using mechanize and cookiejar.
         Then requests for the html of the link, and sets it into `soup`.
 
         Returns:
             soup (obj): BeautifulSoup parsed html object
         """
-        login = "https://intranet.hbtn.io/auth/sign_in"
-        cj = cookielib.CookieJar()
-        br = mechanize.Browser()
-
-        sys.stdout.write("  -> Logging in... ")
-        try:
-            br.set_cookiejar(cj)
-            br.open(login)
-            br.select_form(nr=0)
-            br.form['user[login]'] = self.json_data["intra_user_key"]
-            br.form['user[password]'] = self.json_data["intra_pass_key"]
-            br.submit()
-            page = br.open(self.__htbn_link)
-        except AttributeError:
-            print("[ERROR] Login failed - are your auth_data credentials correct?")
-            sys.exit()
-
+        with requests.Session() as session:
+            auth_url = 'https://intranet.hbtn.io/auth/sign_in'
+            resp = session.get(auth_url)
+            soup = BeautifulSoup(resp.content, features='html.parser')
+            sys.stdout.write("  -> Logging in... ")
+            try:
+                auth_data = {
+                    'user[login]': self.json_data.get(
+                        'intra_user_key'
+                    ),
+                    'user[password]': self.json_data.get(
+                        'intra_pass_key'
+                    ),
+                    'authenticity_token': soup.find(
+                        'input', {'name': 'authenticity_token'}
+                    )['value'],
+                    'commit': soup.find(
+                        'input', {'name': 'commit'}
+                    )['value'],
+                }
+                session.post(auth_url, data=auth_data)
+                resp = session.get(self.hbtn_link)
+                soup = BeautifulSoup(resp.content, features='html.parser')
+            except AttributeError:
+                print("[ERROR] Login failed (are your credentials correct?")
+                sys.exit()
         print("done")
-        self.soup = BeautifulSoup(page, 'html.parser')
-        br.close()
-        del page
-        return self.soup
+        return soup
 
     def find_directory(self):
         """Method that scrapes for project's directory name
@@ -101,7 +116,7 @@ class BaseParse(object):
         """Method that creates appropriate directory"""
         sys.stdout.write("  -> Creating directory... ")
         try:
-            os.mkdir(self.dir_name)
+            os.makedirs(self.dir_name, mode=0o755, exist_ok=False)
             os.chdir(self.dir_name)
             print("done")
         except OSError:

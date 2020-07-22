@@ -1,6 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 """Module for TestFileScraper"""
-from scrapers import *
+import json
+import re
+import sys
+
 
 class TestFileScraper:
     """TestFileScraper class
@@ -30,8 +33,8 @@ class TestFileScraper:
             # find_main checks if there are main files on project page
             if find_test != -1 and (find_c != -1 or find_py != -1 or find_sql != -1 or find_js != -1 or find_html != -1):
                 try:
-                    user = item.text.split("$", 1)[0]
                     name = item.text.split("cat ", 1)[1]
+                    user = item.text.split("$", 1)[0]
                     if find_c != -1:
                         name = name.split(".c", 1)[0] + ".c"
                     elif find_sql != -1:
@@ -56,9 +59,10 @@ class TestFileScraper:
                         if find_html != -1:
                             w_test_file.write(text[i])
                         else:
-                            w_test_file.write(text[i].encode('utf-8') + "\n")
+                            w_test_file.write(text[i] + '\n')
                     w_test_file.close()
                 except (AttributeError, IndexError):
+                    name = item.text
                     newlines = 0
                     # Checks if test file's name has more than 1 newline
                     for i in name:
