@@ -113,7 +113,7 @@ class ReadScraper:
             for comments in info_list:
                 if comments == " Task Body ":
                     info_text = comments.next_element.next_element.text
-                    temp.append(info_text.encode('utf-8'))
+                    temp.append(info_text)
             return temp
         except (IndexError, AttributeError):
             print("[ERROR] Failed to scrape task descriptions")
@@ -168,11 +168,11 @@ class ReadScraper:
         try:
             for item in self.prj_info:
                 if len(item) == 0:
-                    self.readme.write("{}\n".format(item.encode('utf-8')))
+                    self.readme.write("{}\n".format(item))
                     continue
-                self.readme.write("* {}\n".format(item.encode('utf-8')))
+                self.readme.write("* {}\n".format(item))
             print("done")
-        except (AttributeError, IndexError, UnicodeEncodeError):
+        except (AttributeError, IndexError):
             print("\n     [ERROR] Failed to write learning objectives.")
             pass
         self.readme.write("\n")
@@ -221,14 +221,14 @@ class ReadScraper:
             l = len(a[0])
             for idx in range(l):
                 if len(a[0][idx]) == 0:
-                    self.readme.write("{}".format(a[0][idx].encode('utf-8')))
-                    self.readme.write("{}\n".format(a[1][idx].encode('utf-8')))
+                    self.readme.write("{}".format(a[0][idx]))
+                    self.readme.write("{}\n".format(a[1][idx]))
                     continue
-                self.readme.write("* [{}]".format(a[0][idx].encode('utf-8')))
-                self.readme.write("({})\n".format(a[1][idx].encode('utf-8')))
+                self.readme.write("* [{}]".format(a[0][idx]))
+                self.readme.write("({})\n".format(a[1][idx]))
 
             print("done")
-        except (AttributeError, IndexError, UnicodeEncodeError):
+        except (AttributeError, IndexError):
             print("\n     [ERROR] Failed to write resources.")
             pass
         self.readme.write("\n")

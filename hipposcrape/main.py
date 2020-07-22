@@ -2,8 +2,8 @@
 """Provides the main entry point for the hipposcrape module."""
 import sys
 
-from . import hippodir
-from . import hippodoc
+from . hippodir import hippodir
+from . hippodoc import hippodoc
 
 
 def main():
