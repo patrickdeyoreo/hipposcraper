@@ -49,8 +49,7 @@ class Home:
             self.__bin_path = self.home.joinpath('.local', 'bin')
 
     @property
-    @staticmethod
-    def home():
+    def home(self):
         """Get user home directory"""
         return pathlib.Path.home()
 
