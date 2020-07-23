@@ -53,9 +53,9 @@ def hippodoc():
     r_scraper.write_info()
     r_scraper.write_tasks()
 
-    author = str(parse_data.json_data["author_name"])
-    user = str(parse_data.json_data["github_username"])
-    git_link = str(parse_data.json_data["github_profile_link"])
+    author = parse_data.json_data["name"]
+    user = parse_data.json_data["github"]
+    git_link = "/".join(("github.com", parse_data.json_data["github"]))
 
     r_scraper.write_footer(author, user, git_link)
 

@@ -81,12 +81,8 @@ class BaseParse(object):
             sys.stdout.write("  -> Logging in... ")
             try:
                 auth_data = {
-                    'user[login]': self.json_data.get(
-                        'intra_user_key'
-                    ),
-                    'user[password]': self.json_data.get(
-                        'intra_pass_key'
-                    ),
+                    'user[login]': self.json_data.get('login'),
+                    'user[password]': self.json_data.get('password'),
                     'authenticity_token': soup.find(
                         'input', {'name': 'authenticity_token'}
                     )['value'],

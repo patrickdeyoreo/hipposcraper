@@ -11,6 +11,7 @@
 !/hipposcraper.py
 !/requirements.txt
 !/setup.sh
+!/install.py
 !/tests/**
 
 # blacklist remaining "lint"
