@@ -6,11 +6,11 @@ Usage:
     install.py [OPTIONS...]
 
 Options:
-    -g, --github=<github-profile>
-        github profile url or username
+    -g, --github=<github-profile-name>
+        github profile
 
     -n, --name=<author-name>
-        name of the author
+        name of author
 
     -p, --password=<intranet-password>
         holberton password
@@ -19,34 +19,50 @@ Options:
         holberton username
 """
 
+import atexit
 import argparse
 import json
+import logging
 import os
 import pathlib
 import shutil
+import signal
 import sys
 
+import hipposcraper
 
-PACKAGE = 'hipposcraper'
-SRC_DIR = pathlib.Path(__file__).absolute().parent
-SRC_EXE = SRC_DIR.joinpath(os.extsep.join((PACKAGE, 'py')))
-PRIVATE = 'auth_data.json'
+PACKAGE = hipposcraper.__package__
+PROGRAM = PACKAGE
+
+PKGSRC = hipposcraper.__path__
+PRGSRC = os.extsep.join((PKGSRC, 'py'))
+
+PREFIX = os.path.join(os.path.expanduser('~'), '.local')
+
+LOGGER = logging.getLogger(PACKAGE)
 
 
-class Home:
-    """
-    Manage a directory hierarchy compliant with the XDG base directory spec.
-    """
-    def __init__(self, name=''):
-        """Initialize an installation hierarchy"""
-        self.__name = name
-        self.__mode = 0o777 & ~os.umask(0)
-        os.umask(0o777 & ~self.__mode)
+class InstallationDirectories:
+    """Configure installation paths."""
+
+    def __init__(self, package, prefix):
+        """Initialize a configuration."""
+        LOGGER.debug("Configuring installation directories for %s", package)
+        self.__package = package
         self.__created = set()
-        if self.home.joinpath('.bin').exists():
-            self.__bin_path = self.home.joinpath('.bin')
+        self.__mode = 0o777 & ~os.umask(0)
+        LOGGER.info("File creation mode set to %03o (umask %03o)",
+                    self.__mode, os.umask(0o777 & ~self.__mode))
+        for path in sys.path:
+            if path.startswith(prefix):
+                LOGGER.debug("Setting python path to %s", path)
+                self.__python_path = pathlib.Path(path)
+                break
         else:
-            self.__bin_path = self.home.joinpath('.local', 'bin')
+            raise ValueError('no path elements with prefix {}'.format(prefix))
+        self.__paths = [getattr(self, name)
+                        for name, value in vars(type(self)).items()
+                        if isinstance(value, property)]
 
     @property
     def home(self):
@@ -54,81 +70,125 @@ class Home:
         return pathlib.Path.home()
 
     @property
-    def bin_path(self):
-        """Get user data directory"""
-        return self.__bin_path
+    def bin(self):
+        """Get user bin directory"""
+        if self.home.joinpath('.bin').exists():
+            return self.home.joinpath('.bin')
+        return self.home.joinpath('.local', 'bin')
 
     @property
-    def data_path(self):
+    def data(self):
         """Get user data directory"""
         return pathlib.Path(os.getenv(
             'XDG_DATA_HOME',
-            str(self.home.joinpath('.local', 'share'))
-        )).joinpath(self.__name)
+            os.path.join(self.home, '.local', 'share')
+        )).joinpath(self.__package)
 
     @property
-    def config_path(self):
+    def config(self):
         """Get user config directory"""
         return pathlib.Path(os.getenv(
             'XDG_CONFIG_HOME',
-            str(self.home.joinpath('.config'))
-        )).joinpath(self.__name)
+            os.path.join(self.home, '.config')
+        )).joinpath(self.__package)
 
     @property
-    def cache_path(self):
+    def cache(self):
         """Get user cache directory"""
         return pathlib.Path(os.getenv(
             'XDG_CACHE_HOME',
-            str(self.home.joinpath('.cache'))
-        )).joinpath(self.__name)
+            os.path.join(self.home, '.cache')
+        )).joinpath(self.__package)
 
-    def create_paths(self):
-        """Make required components of the hierarchy"""
-        try:
-            self.data_path.mkdir(mode=self.__mode, parents=True)
-            self.__created.add(self.data_path)
-        except FileExistsError:
-            pass
-        try:
-            self.config_path.mkdir(mode=self.__mode, parents=True)
-            self.__created.add(self.config_path)
-        except FileExistsError:
-            pass
-        try:
-            self.cache_path.mkdir(mode=self.__mode, parents=True)
-            self.__created.add(self.cache_path)
-        except FileExistsError:
-            pass
-        try:
-            self.__bin_path.mkdir(mode=self.__mode, parents=True)
-            self.__created.add(self.cache_path)
-        except FileExistsError:
-            pass
+    @property
+    def python_path(self):
+        """Get python path directory"""
+        return self.__python_path
+
+    def create_dirs(self):
+        """Create directories"""
+        LOGGER.info('Creating installation directories...')
+        for path in self.__paths:
+            try:
+                path.mkdir(mode=self.__mode, parents=True)
+                LOGGER.debug('Created %s', path)
+                self.__created.add(path)
+            except FileExistsError:
+                LOGGER.debug('%s already exists', path)
+        LOGGER.info('Directory creation complete.')
+
+    @atexit.register
+    def remove_dirs(self):
+        """Remove directories created by the bound instance"""
+        LOGGER.info('Removing installation directories...')
+        for path in self.__created:
+            try:
+                shutil.rmtree(path)
+                LOGGER.debug('Removed %s', path)
+            except FileNotFoundError:
+                LOGGER.debug('%s not found... where did it go?', path)
+        LOGGER.info('Directory removal complete.')
+
+    def commit_dirs(self):
+        """Commit directory changes such that they may not be undone"""
+        self.__created.clear()
 
 
 def parse_args():
     """Parse command line arguments"""
+    LOGGER.debug('Creating argument parser...')
     parser = argparse.ArgumentParser()
-    parser.add_argument('g', 'github', dest='github', default=None,
+    parser.add_argument('-g', '--github', dest='github', default=None,
                         help='github profile')
-    parser.add_argument('n', 'name', dest='name', default=None,
+    parser.add_argument('-n', '--name', dest='name', default=None,
                         help='name of author')
-    parser.add_argument('p', 'password', dest='password', default=None,
+    parser.add_argument('-p', '--password', dest='password', default=None,
                         help='holberton intranet password')
-    parser.add_argument('u', 'username', dest='login', default=None,
+    parser.add_argument('-u', '--username', dest='login', default=None,
                         help='holberton intranet username')
-    return vars(parser.parse_args())
+    parser.add_argument('-s', '--silent', dest='login', action='store_true',
+                        help='do not prompt for input')
+    LOGGER.debug('Parsing arguments: %s', str(sys.argv[1:]))
+    return parser.parse_args()
+
+
+def read_input(**kwgs):
+    """Read arguments from stdin"""
+    LOGGER.debug('Reading remaining arguments from stdin...')
+    for name in kwgs.items():
+        if value is None:
+            kwgs[name] = value = input('{}: '.format(name))
+    return kwgs
 
 
 def main():
     """Install hipposcraper."""
-    home = Home(name=PACKAGE)
-    home.create_paths()
-    data = parse_args()
-    with open(home.config_path.joinpath(PRIVATE), mode='w') as ostream:
+    try:
+        dirs = InstallationDirectories(PACKAGE, PREFIX)
+    except ValueError as exc:
+        print(*exc.args, sep=': ', file=sys.stderr)
+        sys.exit(1)
+
+    def sigint_handler(*_, **__):
+        """Handle keyboard interrupts"""
+        print('Farewell.', file=sys.stderr)
+        sys.exit(signal.SIGINT)
+
+    signal.signal(signal.SIGINT, sigint_handler)
+
+    data = read_input(**vars(parse_args()))
+    dirs.create_dirs()
+    LOGGER.info('Copying executable to %s', str(dirs.bin.joinpath(PROGRAM)))
+    shutil.copyfile(PRGSRC, dirs.bin.joinpath(PROGRAM))
+    LOGGER.info('Setting permissions on %s', str(dirs.bin.joinpath(PROGRAM)))
+    os.chmod(dirs.bin.joinpath(PROGRAM), mode=0o755)
+    LOGGER.info('Writing user configuration data under %s', str(dirs.config))
+    with open(dirs.config.joinpath('auth_data.json'), mode='w') as ostream:
         json.dump(data, ostream)
-    shutil.copyfile(SRC_EXE, home.bin_path.joinpath(PACKAGE))
+    LOGGER.info('Copying package tree into %s.', str(dirs.python_path))
+    shutil.copytree(PKGSRC, dirs.python_path)
+    LOGGER.info('Installation complete.')
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
