@@ -1,32 +1,119 @@
 #!/usr/bin/env sh
-# Sets up the hipposcraper:
-#+  Configures aliases in .bashrc
-#+  Sets inputted user information in auth.json
+# Install and configure the hipposcraper.
 
-AUTH_FILE='auth_data.json'
+PACKAGE='hipposcraper'
+PROGRAM='hipposcraper.py'
 
-if test "$(id -u)" -eq 0; then
-  2>&1 printf '%s: refusing to execute as root\n' "$0"
-  exit 1
-fi
+SRC_DIR="$(CDPATH='' cd -- "${0%/*}" && pwd -P)"
 
-escape_json_data() {
+PKG_SRC="${SRC_DIR}/${PACKAGE}"
+PRG_SRC="${SRC_DIR}/${PROGRAM}"
+
+HIPPO_HOME="${HIPPO_HOME:-${XDG_DATA_HOME:-${HOME}/.local/share}/hipposcraper}"
+HIPPO_AUTH="${HIPPO_HOME}/auth_data.json"
+
+
+main() {
+  check_privilege
+  show_off_banner
+  echo
+  install_depends
+  echo
+  make_hippo_home
+  echo
+  install_package
+  echo
+  configure_login
+  echo
+  update_shell_rc
+}
+
+
+check_privilege() {
+  if test "$(id -u)" -eq 0; then
+    2>&1 printf '%s: refusing to run as root\n' "$0"
+    exit 1
+  fi
+}
+
+
+show_off_banner() {
+  tput bold
+  cat
+  tput sgr0
+  sleep 1
+} 2> /dev/null << 'EOF'
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+#     #
+#     # # #####  #####   ####   ####   ####  #####    ##   #####  ###### #####
+#     # # #    # #    # #    # #      #    # #    #  #  #  #    # #      #    #
+####### # #    # #    # #    #  ####  #      #    # #    # #    # #####  #    #
+#     # # #####  #####  #    #      # #      #####  ###### #####  #      #####
+#     # # #      #      #    # #    # #    # #   #  #    # #      #      #   #
+#     # # #      #       ####   ####   ####  #    # #    # #      ###### #    #
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+EOF
+
+
+install_depends() {
+  if ! python3 -m pip install --user -U -r "${SRC_DIR}/requirements.txt"; then
+    2>&1 printf '%s: failed to install dependencies\n' "$0"
+    exit 1
+  fi
+}
+
+
+make_hippo_home() {
+  if ! test -d "${HIPPO_HOME}"; then
+    if ! rm -fv -- "${HIPPO_HOME}"; then
+      2>&1 printf '%s: %s: failed to remove file\n' "$0" "${HIPPO_HOME}"
+      exit 1
+    fi
+    if ! mkdir -v -- "${HIPPO_HOME}"; then
+      2>&1 printf '%s: %s: failed to create directory\n' "$0" "${HIPPO_HOME}"
+      exit 1
+    fi
+  fi
+  if ! chown -c "$(id -u)" -- "${HIPPO_HOME}"; then
+      2>&1 printf '%s: %s: failed to set file owner\n' "$0" "${HIPPO_HOME}"
+      exit 1
+  fi
+  if ! chmod -c u+rwx -- "${HIPPO_HOME}"; then
+      2>&1 printf '%s: %s: failed to set file mode\n' "$0" "${HIPPO_HOME}"
+      exit 1
+  fi
+}
+
+
+escape_json_str() {
   printf '%s' "$1" | sed 's:["\]:\\&:g'
 }
 
-write_auth_data() {
-  cat > "${AUTH_FILE}"
+
+save_login_data() {
+  cat > "${HIPPO_AUTH}"
 } << EOF
 {
-  "author_name": "$(escape_json_data "${author_name}")",
-  "intra_user_key": "$(escape_json_data "${intra_user_key}")",
-  "intra_pass_key": "$(escape_json_data "${intra_pass_key}")",
-  "github_username": "$(escape_json_data "${github_username}")",
-  "github_profile_link": "$(escape_json_data "github.com/${github_username}")"
+  "author_name": "$(escape_json_str "${author_name}")",
+  "intra_user_key": "$(escape_json_str "${intra_user_key}")",
+  "intra_pass_key": "$(escape_json_str "${intra_pass_key}")",
+  "github_username": "$(escape_json_str "${github_username}")",
+  "github_profile_link": "$(escape_json_str "github.com/${github_username}")"
 }
 EOF
 
-input_auth_data() {
+
+install_package() {
+  printf 'Copying %s into %s ...\n' "${PKG_SRC}" "${HIPPO_HOME}'"
+  cp -a -- "${PKG_SRC}" "${PRG_SRC}" "${HIPPO_HOME}"
+}
+
+
+read_login_data() {
   printf '*> Author: '
   read -r author_name
   printf '*> Holberton Username: '
@@ -37,86 +124,46 @@ input_auth_data() {
   read -r github_username
 }
 
-{ tput bold
-  tput sitm
+
+configure_login() {
+  if test -f "${HIPPO_AUTH}"; then
+    printf 'Found existing configuration in %s\n' "'${HIPPO_AUTH}'"
+    printf 'Overwrite? [Y/n] '
+    read -r REPLY
+    case "${REPLY}" in
+      [Yy]*)
+        printf 'Configuration will be overwritten.\n'
+        ;;
+      *)
+        printf 'Configuration will not be changed.\n'
+        return 0
+        ;;
+    esac
+  fi
+  if read_login_data && save_login_data; then
+    printf 'Configuration written to %s\n' "${HIPPO_AUTH}"
+  else
+    printf 'Failed to write configuration to %s\n' "${HIPPO_AUTH}"
+  fi
+}
+
+
+update_shell_rc() {
   cat
-  tput sgr0
-} 2> /dev/null << 'EOF'
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+} << EOF
+To complete installation, the execution environment needs to be updated.
+You may add the following to a shell init script (e.g. ~/.bashrc, etc.):
 
-.,     W
-][     "
-]bWW, WW  ]bWb ]bWb  dWb .dWW, dWW, WdW[ dWW,]bWb  dWb  WdW[
-]P ][  W  ]P T[]P T[]P T[]bm,`]P  ` W`   `md[]P T[]bmd[ W`
-][ ][  W  ][ ][][ ][][ ][ ""W,][    W   .W"T[][ ][]P""` W
-][ ][.mWm,]WmW`]WmW`'WmW`]mmd['Wmm[ W   ]bmW[]WmW`'Wmm[ W
-'` '`'"""`]["` ]["`  '"`  """  '""  "    ""'`]["`  '""  "
-          ][   ][                            ][
+export HIPPO_HOME="${HIPPO_HOME}"
+export PATH="\${PATH:+\${PATH}:}\${HIPPO_HOME}"
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+If you prefer to manage the environment some other way, modify as needed.
 
+Once the configuration is complete, open a shell and run 'hipposcraper.py'
 EOF
 
-if test -f ${AUTH_FILE}; then
-  printf 'Found existing configuration in %s\n' "'${AUTH_FILE}'"
-  printf 'Overwrite? [Y/n] '
-  read -r REPLY
-  case "${REPLY}" in
-    [Yy]*)
-      printf 'Configuration will be overwritten.\m'
-      input_auth_data && write_auth_data
-      ;;
-    *)
-      printf 'Configuration will not be changed.\n'
-      ;;
-  esac
-else
-  input_auth_data && write_auth_data
-fi
 
-#if grep -q ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE hipposcraper.py
-#then
-#  sed -i "s/ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE/$(pwd)/g" hipposcraper.py
-#fi
-#
-#echo "Setting aliases:"
-#if ! grep -q hippodir ~/.bashrc || \
-#  ! grep -q hippodoc ~/.bashrc || \
-#  ! grep -q hipposcraper ~/.bashrc
-#then
-#  echo -e "\n# Hipposcraper aliases" >> ~/.bashrc
-#fi
-#
-#if ! grep -q hippodir.py ~/.bashrc
-#then
-#  project_alias="alias hippodir='python3 $(pwd)/hippodir.py'"
-#  echo "$project_alias" >> ~/.bashrc
-#  echo "  -> $project_alias"
-#else
-#  echo "  -> hippodir already defined"
-#fi
-#
-#if ! grep -q hippodoc.py ~/.bashrc
-#then
-#  read_alias="alias hippodoc='python3 $(pwd)/hippodoc.py'"
-#  echo "$read_alias" >> ~/.bashrc
-#  echo "  -> $read_alias"
-#else
-#  echo "  -> hippodoc already defined"
-#fi
-#
-#if ! grep -q hipposcraper.py ~/.bashrc
-#then
-#  scrape_alias="alias hipposcraper='python3 $(pwd)/hipposcraper.py'"
-#  echo "$scrape_alias" >> ~/.bashrc
-#  echo "  -> $scrape_alias"
-#else
-#  echo "  -> hipposcraper already defined"
-#fi
-#
-#echo "Reloading .bashrc:"
-#. ~/.bashrc
-#
-#echo "All set!"
+main "$@"
+
+
+# vim:et:sts=2:sw=2
