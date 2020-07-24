@@ -1,97 +1,122 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 # Sets up the hipposcraper:
 #+  Configures aliases in .bashrc
 #+  Sets inputted user information in auth.json
 
-echo "Thanks for downloading the Hipposcraper! Let's get you set up."
-echo "  -> Checking if auth_data.json exists..."
-if [ ! -f auth_data.json ]
-then
-    echo "  -> auth_data.json does not exist, creating it..."
-    echo "{\"intra_user_key\": \"YOUR_HOLBERTON_INTRANET_USERNAME\", \"intra_pass_key\": \"YOUR_HOLBERTON_INTRANET_PASSWORD\", \"author_name\": \"YOUR_NAME\", \"github_username\": \"YOUR_GITHUB_USERNAME\", \"github_profile_link\": \"YOUR_GITHUB_PROFILE_LINK\"}" > auth_data.json
+AUTH_FILE='auth_data.json'
+
+if test "$(id -u)" -eq 0; then
+  2>&1 printf '%s: refusing to execute as root\n' "$0"
+  exit 1
+fi
+
+escape_json_data() {
+  printf '%s' "$1" | sed 's:["\]:\\&:g'
+}
+
+write_auth_data() {
+  cat > "${AUTH_FILE}"
+} << EOF
+{
+  "author_name": "$(escape_json_data "${author_name}")",
+  "intra_user_key": "$(escape_json_data "${intra_user_key}")",
+  "intra_pass_key": "$(escape_json_data "${intra_pass_key}")",
+  "github_username": "$(escape_json_data "${github_username}")",
+  "github_profile_link": "$(escape_json_data "github.com/${github_username}")"
+}
+EOF
+
+input_auth_data() {
+  printf '*> Author: '
+  read -r author_name
+  printf '*> Holberton Username: '
+  read -r intra_user_key
+  printf '*> Holberton Password: '
+  read -r intra_pass_key
+  printf '*> GitHub Username: '
+  read -r github_username
+}
+
+{ tput bold
+  tput sitm
+  cat
+  tput sgr0
+} 2> /dev/null << 'EOF'
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+.,     W
+][     "
+]bWW, WW  ]bWb ]bWb  dWb .dWW, dWW, WdW[ dWW,]bWb  dWb  WdW[
+]P ][  W  ]P T[]P T[]P T[]bm,`]P  ` W`   `md[]P T[]bmd[ W`
+][ ][  W  ][ ][][ ][][ ][ ""W,][    W   .W"T[][ ][]P""` W
+][ ][.mWm,]WmW`]WmW`'WmW`]mmd['Wmm[ W   ]bmW[]WmW`'Wmm[ W
+'` '`'"""`]["` ]["`  '"`  """  '""  "    ""'`]["`  '""  "
+          ][   ][                            ][
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+EOF
+
+if test -f ${AUTH_FILE}; then
+  printf 'Found existing configuration in %s\n' "'${AUTH_FILE}'"
+  printf 'Overwrite? [Y/n] '
+  read -r REPLY
+  case "${REPLY}" in
+    [Yy]*)
+      printf 'Configuration will be overwritten.\m'
+      input_auth_data && write_auth_data
+      ;;
+    *)
+      printf 'Configuration will not be changed.\n'
+      ;;
+  esac
 else
-    echo "  -> auth_data.json exists, proceeding..."
-fi
-echo -n "  -> Holberton Intranet email: "
-read -r email
-echo -n "  -> Holberton Intranet password: "
-read -r password
-echo -n "  -> Full name (for author section of README's): "
-read -r name
-echo -n "  -> Github username: "
-read -r github_username
-echo -n "  -> Github profile link: "
-read -r github_link
-
-# & escaper
-PASSWORD=$(sed 's/[\*\.&]/\\&/g' <<<"$password")
-
-if grep -q YOUR_HOLBERTON_INTRANET_USERNAME auth_data.json
-then
-    sed -i "s/YOUR_HOLBERTON_INTRANET_USERNAME/$email/g" auth_data.json
+  input_auth_data && write_auth_data
 fi
 
-if grep -q YOUR_HOLBERTON_INTRANET_PASSWORD auth_data.json
-then
-    sed -i "s/YOUR_HOLBERTON_INTRANET_PASSWORD/$PASSWORD/g" auth_data.json
-fi
-
-if grep -q YOUR_NAME auth_data.json
-then
-    sed -i "s/YOUR_NAME/$name/g" auth_data.json
-fi
-
-if grep -q YOUR_GITHUB_USERNAME auth_data.json
-then
-    sed -i "s/YOUR_GITHUB_USERNAME/$github_username/g" auth_data.json
-fi
-
-if grep -q YOUR_GITHUB_PROFILE_LINK auth_data.json
-then
-    sed -i "s,YOUR_GITHUB_PROFILE_LINK,$github_link,g" auth_data.json
-fi
-
-if grep -q ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE hipposcraper.sh
-then
-    sed -i "s/ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE/$(pwd)/g" hipposcraper.sh
-fi
-
-echo "Setting aliases:"
-if ! grep -q hippoproject ~/.bashrc || \
-   ! grep -q hipporead  ~/.bashrc || \
-   ! grep -q hipposcraper ~/.bashrc
-then
-    echo -e "\n# Hipposcraper aliases" >> ~/.bashrc
-fi
-
-if ! grep -q hippoproject.py ~/.bashrc
-then
-    project_alias="alias hippoproject='python3 $(pwd)/hippoproject.py'"
-    echo "$project_alias" >> ~/.bashrc
-    echo "  -> $project_alias"
-else
-    echo "  -> hippoproject already defined"
-fi
-
-if ! grep -q hipporead.py ~/.bashrc
-then
-  read_alias="alias hipporead='python3 $(pwd)/hipporead.py'"
-    echo "$read_alias" >> ~/.bashrc
-    echo "  -> $read_alias"
-else
-    echo "  -> hipporead already defined"
-fi
-
-if ! grep -q hipposcraper.sh ~/.bashrc
-then
-    scrape_alias="alias hipposcraper='python3 $(pwd)/hipposcraper.sh'"
-    echo "$scrape_alias" >> ~/.bashrc
-    echo "  -> $scrape_alias"
-else
-    echo "  -> hipposcraper already defined"
-fi
-
-echo "Reloading .bashrc:"
-source ~/.bashrc
-
-echo "All set!"
+#if grep -q ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE hipposcraper.py
+#then
+#  sed -i "s/ENTER_FULL_PATHNAME_TO_DIRECTORY_HERE/$(pwd)/g" hipposcraper.py
+#fi
+#
+#echo "Setting aliases:"
+#if ! grep -q hippodir ~/.bashrc || \
+#  ! grep -q hippodoc ~/.bashrc || \
+#  ! grep -q hipposcraper ~/.bashrc
+#then
+#  echo -e "\n# Hipposcraper aliases" >> ~/.bashrc
+#fi
+#
+#if ! grep -q hippodir.py ~/.bashrc
+#then
+#  project_alias="alias hippodir='python3 $(pwd)/hippodir.py'"
+#  echo "$project_alias" >> ~/.bashrc
+#  echo "  -> $project_alias"
+#else
+#  echo "  -> hippodir already defined"
+#fi
+#
+#if ! grep -q hippodoc.py ~/.bashrc
+#then
+#  read_alias="alias hippodoc='python3 $(pwd)/hippodoc.py'"
+#  echo "$read_alias" >> ~/.bashrc
+#  echo "  -> $read_alias"
+#else
+#  echo "  -> hippodoc already defined"
+#fi
+#
+#if ! grep -q hipposcraper.py ~/.bashrc
+#then
+#  scrape_alias="alias hipposcraper='python3 $(pwd)/hipposcraper.py'"
+#  echo "$scrape_alias" >> ~/.bashrc
+#  echo "  -> $scrape_alias"
+#else
+#  echo "  -> hipposcraper already defined"
+#fi
+#
+#echo "Reloading .bashrc:"
+#. ~/.bashrc
+#
+#echo "All set!"
