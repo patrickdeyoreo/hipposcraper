@@ -8,6 +8,8 @@ import sys
 from bs4 import BeautifulSoup
 import requests
 
+from hipposcraper import config
+
 
 class BaseParse(object):
     """
@@ -18,14 +20,14 @@ class BaseParse(object):
         link (str): link to the project page to scrape
 
     Attributes:
-        json_data (dict): read json data from auth_data.json
+        json_data (dict): read json data from credentials.json
         soup (obj): BeautifulSoup obj containing parsed link
         dir_name (str): directory name of the link
     """
 
     def __init__(self, link=""):
         self.hbtn_link = link
-        self.json_data = self.get_json()
+        self.json_data = config.CREDENTIALS
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
@@ -53,19 +55,6 @@ class BaseParse(object):
             value = input("Enter link to project: ")
         self.__hbtn_link = value
 
-    def get_json(self):
-        """Method that reads auth_data.json.
-
-        Sets json read to `json_data`
-        """
-        super_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        try:
-            with open("{}/auth_data.json".format(super_path.rsplit("/", 1)[0]), "r") as json_file:
-                return json.load(json_file)
-        except IOError:
-            print("[ERROR] Please run ./setup.sh to setup your auth data...")
-            sys.exit()
-
     def get_soup(self):
         """Method that parses the `hbtn_link` with BeautifulSoup
 
@@ -80,7 +69,7 @@ class BaseParse(object):
             soup = BeautifulSoup(resp.content, features='html.parser')
             sys.stdout.write("  -> Logging in... ")
             try:
-                auth_data = {
+                credentials = {
                     'user[login]': self.json_data.get('login'),
                     'user[password]': self.json_data.get('password'),
                     'authenticity_token': soup.find(
@@ -90,7 +79,7 @@ class BaseParse(object):
                         'input', {'name': 'commit'}
                     )['value'],
                 }
-                session.post(auth_url, data=auth_data)
+                session.post(auth_url, data=credentials)
                 resp = session.get(self.hbtn_link)
                 soup = BeautifulSoup(resp.content, features='html.parser')
             except AttributeError:

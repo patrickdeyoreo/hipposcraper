@@ -53,7 +53,7 @@ Note that you may need to run the `--user` option when installing these packages
 
 After cloning a local copy of the repository, enter your Holberton intranet 
 username and password as well as your GitHub name, username, and profile link 
-in the [auth_data.json](./auth_data.json) file.
+in the [credentials.json](./credentials.json) file.
   - **Using `setup.sh`: Run `./setup.sh` to automatically setup the required information**
 
 **Setting Aliases**
@@ -132,7 +132,7 @@ directories.
   * Python script that scrapes Holberton intranet webpage to create project 
 `README.md`.
 
-* [auth_data.json](./auth_data.json)
+* [credentials.json](./credentials.json)
   * Stores user Holberton intranet and GitHub profile information.
 
 * [scrapers](./scrapers)

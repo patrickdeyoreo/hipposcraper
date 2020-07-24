@@ -34,7 +34,7 @@ import hipposcraper
 PACKAGE = hipposcraper.__package__
 PROGRAM = PACKAGE
 
-PKGSRC = hipposcraper.__path__
+PKGSRC = hipposcraper.__path__[0]
 PRGSRC = os.extsep.join((PKGSRC, 'py'))
 
 PREFIX = os.path.join(os.path.expanduser('~'), '.local')
@@ -72,8 +72,8 @@ class InstallationDirectories:
     @property
     def bin(self):
         """Get user bin directory"""
-        if self.home.joinpath('.bin').exists():
-            return self.home.joinpath('.bin')
+        if (self.home / '.bin').exists():
+            return self.home / '.bin'
         return self.home.joinpath('.local', 'bin')
 
     @property
@@ -117,7 +117,6 @@ class InstallationDirectories:
                 LOGGER.debug('%s already exists', path)
         LOGGER.info('Directory creation complete.')
 
-    @atexit.register
     def remove_dirs(self):
         """Remove directories created by the bound instance"""
         LOGGER.info('Removing installation directories...')
@@ -146,8 +145,6 @@ def parse_args():
                         help='holberton intranet password')
     parser.add_argument('-u', '--username', dest='login', default=None,
                         help='holberton intranet username')
-    parser.add_argument('-s', '--silent', dest='login', action='store_true',
-                        help='do not prompt for input')
     LOGGER.debug('Parsing arguments: %s', str(sys.argv[1:]))
     return parser.parse_args()
 
@@ -155,38 +152,38 @@ def parse_args():
 def read_input(**kwgs):
     """Read arguments from stdin"""
     LOGGER.debug('Reading remaining arguments from stdin...')
-    for name in kwgs.items():
+    for name, value in kwgs.items():
         if value is None:
-            kwgs[name] = value = input('{}: '.format(name))
+            kwgs[name] = input('{}: '.format(name))
     return kwgs
-
 
 def main():
     """Install hipposcraper."""
+    signal.signal(
+        signal.SIGINT,
+        lambda *_:
+        print('Farewell.', file=sys.stderr) or sys.exit(signal.SIGINT))
+
     try:
         dirs = InstallationDirectories(PACKAGE, PREFIX)
+        atexit.register(dirs.remove_dirs)
     except ValueError as exc:
         print(*exc.args, sep=': ', file=sys.stderr)
         sys.exit(1)
 
-    def sigint_handler(*_, **__):
-        """Handle keyboard interrupts"""
-        print('Farewell.', file=sys.stderr)
-        sys.exit(signal.SIGINT)
-
-    signal.signal(signal.SIGINT, sigint_handler)
-
     data = read_input(**vars(parse_args()))
     dirs.create_dirs()
-    LOGGER.info('Copying executable to %s', str(dirs.bin.joinpath(PROGRAM)))
+    LOGGER.info('Copying executable to %s ...', str(dirs.bin.joinpath(PROGRAM)))
     shutil.copyfile(PRGSRC, dirs.bin.joinpath(PROGRAM))
-    LOGGER.info('Setting permissions on %s', str(dirs.bin.joinpath(PROGRAM)))
+    LOGGER.info('Setting permissions on %s ...', str(dirs.bin.joinpath(PROGRAM)))
     os.chmod(dirs.bin.joinpath(PROGRAM), mode=0o755)
-    LOGGER.info('Writing user configuration data under %s', str(dirs.config))
-    with open(dirs.config.joinpath('auth_data.json'), mode='w') as ostream:
+    LOGGER.info('Writing user configuration data under %s ...', str(dirs.config))
+    with open(dirs.config / 'credentials.json', mode='w') as ostream:
         json.dump(data, ostream)
-    LOGGER.info('Copying package tree into %s.', str(dirs.python_path))
-    shutil.copytree(PKGSRC, dirs.python_path)
+    LOGGER.info('Copying package tree into %s ...', str(dirs.python_path))
+    shutil.copytree(PKGSRC, dirs.python_path.joinpath(PACKAGE))
+    LOGGER.info('Committing directory changes ...')
+    dirs.commit_dirs()
     LOGGER.info('Installation complete.')
 
 

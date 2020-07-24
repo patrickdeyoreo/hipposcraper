@@ -10,7 +10,7 @@ PKG_SRC="${SRC_DIR}/${PACKAGE}"
 PRG_SRC="${SRC_DIR}/${PROGRAM}"
 
 HIPPO_HOME="${HIPPO_HOME:-${XDG_DATA_HOME:-${HOME}/.local/share}/hipposcraper}"
-HIPPO_AUTH="${HIPPO_HOME}/auth_data.json"
+HIPPO_AUTH="${HIPPO_HOME}/credentials.json"
 
 
 main() {
