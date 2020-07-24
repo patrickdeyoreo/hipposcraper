@@ -10,6 +10,7 @@
 !/hipposcraper/**
 !/hipposcraper.py
 !/requirements.txt
+!/setup.py
 !/setup.sh
 !/install.py
 !/tests/**
