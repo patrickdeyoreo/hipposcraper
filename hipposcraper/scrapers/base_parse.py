@@ -8,7 +8,7 @@ import sys
 from bs4 import BeautifulSoup
 import requests
 
-from hipposcraper import config
+from .. configuration import Credentials
 
 
 class BaseParse(object):
@@ -27,7 +27,7 @@ class BaseParse(object):
 
     def __init__(self, link=""):
         self.hbtn_link = link
-        self.json_data = config.CREDENTIALS
+        self.json_data = Credentials(load=True)
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
@@ -67,18 +67,18 @@ class BaseParse(object):
             auth_url = 'https://intranet.hbtn.io/auth/sign_in'
             resp = session.get(auth_url)
             soup = BeautifulSoup(resp.content, features='html.parser')
-            sys.stdout.write("  -> Logging in... ")
+            credentials = {
+                'user[login]': self.json_data.get('holberton_username'),
+                'user[password]': self.json_data.get('holberton_password'),
+                'authenticity_token': soup.find(
+                    'input', {'name': 'authenticity_token'}
+                ).get('value'),
+                'commit': soup.find(
+                    'input', {'name': 'commit'}
+                ).get('value'),
+            }
             try:
-                credentials = {
-                    'user[login]': self.json_data.get('login'),
-                    'user[password]': self.json_data.get('password'),
-                    'authenticity_token': soup.find(
-                        'input', {'name': 'authenticity_token'}
-                    )['value'],
-                    'commit': soup.find(
-                        'input', {'name': 'commit'}
-                    )['value'],
-                }
+                sys.stdout.write("  -> Logging in... ")
                 session.post(auth_url, data=credentials)
                 resp = session.get(self.hbtn_link)
                 soup = BeautifulSoup(resp.content, features='html.parser')

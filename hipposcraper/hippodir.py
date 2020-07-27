@@ -6,6 +6,7 @@ usage: hippodir.py URL ...
 import os
 import sys
 
+import hipposcraper
 from . import scrapers
 
 
@@ -47,7 +48,7 @@ def hippodir():
     """
     link = get_args()
 
-    print("\nHipposcraper version 1.1.1")
+    print("Hippodir (v{})".format(hipposcraper.__version__))
     print("Creating project:")
     parse_data = scrapers.BaseParse(link)
 

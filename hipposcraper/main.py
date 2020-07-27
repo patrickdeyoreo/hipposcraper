@@ -2,6 +2,7 @@
 """Provides the main entry point for the hipposcraper module."""
 import sys
 
+from . hippoconfig import hippoconfig # pylint: disable=unused-import
 from . hippodir import hippodir
 from . hippodoc import hippodoc
 

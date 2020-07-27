@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""
-Provide scraping tools for Holberton projects.
-"""
+"""Provide scraping tools for Holberton projects."""
 from . base_parse import BaseParse
 from . high_scraper import HighScraper
 from . low_scraper import LowScraper

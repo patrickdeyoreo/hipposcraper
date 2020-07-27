@@ -48,11 +48,10 @@ class ReadScraper:
     def check_big_project(self):
         """Method that checks if project is a big one"""
         try:
-            temp = self.repo_name.find_next("li").next_element.next_element.text
-            if "-" not in temp:
+            tmp = self.repo_name.find_next("li").next_element.next_element.text
+            if "-" not in tmp:
                 raise AttributeError
-            else:
-                return temp
+            return tmp
         except AttributeError:
             sys.stdout.write("\n     [ERROR] Failed to find directory,\
                              skipping directory creation... ")
@@ -189,13 +188,14 @@ class ReadScraper:
                 try:
                     self.readme.write("\n")
                     self.readme.write("### [{}](./{})\n".format(
-                                      self.task_names[count], self.file_names[count]))
-                    self.readme.write("* {}\n".format(self.task_info[count]))
+                        self.task_names[count], self.file_names[count]))
+                    self.readme.write("* {}\n".format(
+                        self.task_info[count]))
                     self.readme.write("\n")
                     count += 1
                 except IndexError:
-                    sys.stdout.write("\n     [ERROR] Could not write task {}... "
-                                     .format(self.task_names[count]))
+                    print("\n     [ERROR] Failed to write task {}... ".format(
+                        self.task_names[count]), end='')
                     count += 1
                     continue
             print("done")
@@ -217,15 +217,14 @@ class ReadScraper:
         self.readme.write("## Resources:books:\n")
         self.readme.write("Read or watch:\n")
         try:
-            a = self.prj_rsc
-            l = len(a[0])
-            for idx in range(l):
-                if len(a[0][idx]) == 0:
-                    self.readme.write("{}".format(a[0][idx]))
-                    self.readme.write("{}\n".format(a[1][idx]))
+            res = self.prj_rsc
+            for idx in range(len(res[0])):
+                if len(res[0][idx]) == 0:
+                    self.readme.write("{}".format(res[0][idx]))
+                    self.readme.write("{}\n".format(res[1][idx]))
                     continue
-                self.readme.write("* [{}]".format(a[0][idx]))
-                self.readme.write("({})\n".format(a[1][idx]))
+                self.readme.write("* [{}]".format(res[0][idx]))
+                self.readme.write("({})\n".format(res[1][idx]))
 
             print("done")
         except (AttributeError, IndexError):

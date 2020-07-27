@@ -5,6 +5,7 @@ usage: hippodoc.py URL ...
 """
 import sys
 
+import hipposcraper
 from . import scrapers
 
 
@@ -36,8 +37,8 @@ def hippodoc():
 
     link = get_args()
 
-    print("\nHipposcraper version 1.1.1")
-    print("Creating README.md file:")
+    print("Hippodoc (v{})".format(hipposcraper.__version__))
+    print("Creating README.md:")
     parse_data = scrapers.BaseParse(link)
 
     sys.stdout.write("  -> Scraping information... ")
@@ -53,11 +54,9 @@ def hippodoc():
     r_scraper.write_info()
     r_scraper.write_tasks()
 
-    author = parse_data.json_data["name"]
-    user = parse_data.json_data["github"]
-    git_link = "/".join(("github.com", parse_data.json_data["github"]))
-
-    r_scraper.write_footer(author, user, git_link)
+    author = parse_data.json_data["author"]
+    user = parse_data.json_data["github_username"]
+    r_scraper.write_footer(author, user, "https://github.com/{}".format(user))
 
     print("README.md all set!")
 

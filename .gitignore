@@ -6,13 +6,18 @@
 
 # whitelist files as needed
 !README.*
+!LICENSE
+!AUTHORS
 !.gitignore
-!/hipposcraper/**
+!/hippoconfig.py
+!/hippodir.py
+!/hippodoc.py
 !/hipposcraper.py
+!/hipposcraper/**
+!/install.py
 !/requirements.txt
 !/setup.py
 !/setup.sh
-!/install.py
 !/tests/**
 
 # blacklist remaining "lint"

@@ -1,42 +1,39 @@
 #!/usr/bin/env python3
 """setuptools build script"""
 import pathlib
-from setuptools import setup, find_packages
+import setuptools
 
 here = pathlib.Path(__file__).parent.resolve()
 
-try:
-    long_description = (here / 'README.md').read_text(encoding='utf-8')
-except FileNotFoundError:
-    long_description = ''
-
-setup(
+setuptools.setup(
     name="hipposcraper",
-    version="1.1.1",
+    version="2.0.0",
     author="Patrick DeYoreo",
     author_email="pdeyoreo@gmail.com",
-    description="Create Holberton project skeletons and documentation.",
-    long_description=long_description,
+    description="Create Holberton School project skeletons and documentation.",
+    long_description=here.joinpath('README.md').read_text(encoding='utf-8'),
     long_description_content_type="text/markdown",
     url="github.com/patrickdeyoreo/hipposcraper",
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Environment :: Console",
         "License :: OSI Approved :: GNU GPL version 3",
-        "Operating System :: OS Independent",
+        "Operating System :: MacOS",
+        "Operating System :: POSIX",
+        "Operating System :: Unix",
+        "Programming Language :: Python :: 3",
     ],
-    packages=find_packages(),
+    packages=setuptools.find_packages(),
     entry_points={
         'console_scripts': [
             'hipposcraper=hipposcraper:main',
+            'hippodoc=hipposcraper:hippodoc',
+            'hippodir=hipposcraper:hippodir',
+            'hippoconfig=hipposcraper:hippoconfig',
         ],
     },
-    package_data={
-        'hipposcraper': [
-            'templates/*',
-        ],
-    },
-    python_requires='>=3.5',
+    python_requires='>=3.4',
     install_requires=[
-        'beautifulsoup4',
+        'beautifulsoup4 >=4.8.2, <5',
+        'lxml >=4.5.2, <5',
     ],
 )

@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Module for SysScraper"""
-import json
 import re
 import sys
 
@@ -29,8 +28,7 @@ class SysScraper:
         temp = self.soup.find_all(string=re.compile("env ruby"))
         if temp != []:
             return 0
-        else:
-            return temp
+        return temp
 
     def find_files(self):
         """Method that scrapes bash or ruby for file names"""

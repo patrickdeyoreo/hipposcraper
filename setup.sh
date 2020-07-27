@@ -98,11 +98,10 @@ save_login_data() {
   cat > "${HIPPO_AUTH}"
 } << EOF
 {
-  "author_name": "$(escape_json_str "${author_name}")",
-  "intra_user_key": "$(escape_json_str "${intra_user_key}")",
-  "intra_pass_key": "$(escape_json_str "${intra_pass_key}")",
+  "author": "$(escape_json_str "${author}")",
   "github_username": "$(escape_json_str "${github_username}")",
-  "github_profile_link": "$(escape_json_str "github.com/${github_username}")"
+  "holberton_username": "$(escape_json_str "${holberton_username}")",
+  "holberton_password": "$(escape_json_str "${holberton_password}")"
 }
 EOF
 
@@ -115,12 +114,12 @@ install_package() {
 
 read_login_data() {
   printf '*> Author: '
-  read -r author_name
-  printf '*> Holberton Username: '
-  read -r intra_user_key
+  read -r author
+  printf '*> Holberton Credentialsname: '
+  read -r holberton_username
   printf '*> Holberton Password: '
-  read -r intra_pass_key
-  printf '*> GitHub Username: '
+  read -r holberton_password
+  printf '*> GitHub Credentialsname: '
   read -r github_username
 }
 
