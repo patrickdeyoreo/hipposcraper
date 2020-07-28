@@ -24,10 +24,10 @@ import pprint
 import sys
 
 import hipposcraper
-from . import configuration
+from . import config
 
 
-def parse_kwargs():
+def parse_args():
     """Parse arguments passed by caller."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--author-name', dest='author',
@@ -45,29 +45,29 @@ def parse_kwargs():
 def hippoconfig():
     """Create and modify user config."""
     print("Hippoconfig (v{})".format(hipposcraper.__version__))
-    config = configuration.Credentials()
+    data = config.Credentials()
     if len(sys.argv) > 1:
         try:
             print("Loaded configuration from {}".format(
-                config.load().replace(os.path.expanduser('~'), '~', 1)
+                data.load().replace(os.path.expanduser('~'), '~', 1)
             ))
-            print('Existing config:')
-            pprint.pprint(config)
+            print('Existing data:')
+            pprint.pprint(data)
         except FileNotFoundError:
-            print("No config found.")
+            print("No data found.")
         except json.JSONDecodeError:
-            print("Unable to load config from invalid JSON.")
+            print("Unable to load data from invalid JSON.")
         except OSError:
-            print("Unable to load config.")
+            print("Unable to load data.")
         print("Updating configuration...")
-        config.update(parse_kwargs())
+        data.update(parse_args())
     else:
-        config.update(
-            (key, input('{}: '.format(config.info(key)))) for key in config)
-    print("New config:")
-    pprint.pprint(config)
+        data.update(
+            (key, input('{}: '.format(data.info(key)))) for key in data)
+    print("New data:")
+    pprint.pprint(data)
     print("Saved configuration to {}".format(
-        config.save().replace(os.path.expanduser('~'), '~', 1)
+        data.save().replace(os.path.expanduser('~'), '~', 1)
     ))
 
 

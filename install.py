@@ -20,7 +20,6 @@ Options:
 """
 
 import atexit
-import json
 import logging
 import os
 import pathlib
@@ -33,22 +32,33 @@ import sys
 try:
     import hipposcraper
 except ImportError:
-    cmd = (sys.executable, '-m', 'pip', 'install', '--user', '-r', 'requirements.txt')
-    process = subprocess.run(cmd)
-    if process.returncode != 0:
-        sys.exit(1)
+    try:
+        subprocess.run([
+            sys.executable, '-m', 'pip', 'install', '--user', '-r',
+            str(pathlib.Path(__file__).absolute().parent / 'requirements.txt')
+        ], check=True)
+    except subprocess.CalledProcessError as err:
+        sys.exit(err.returncode)
     import hipposcraper
 
+
+THISDIR = pathlib.Path(__file__).absolute().parent
 PACKAGE = hipposcraper.__package__
-PROGRAM = PACKAGE
+SCRIPTS = {
+    'hippoconfig': THISDIR / 'hippoconfig.py',
+    'hippodir': THISDIR / 'hippodir.py',
+    'hippodoc': THISDIR / 'hippodoc.py',
+    'hipposcraper': THISDIR / 'hipposcraper.py',
+}
 
-PKGSRC = os.path.dirname(hipposcraper.__file__)
-PRGSRC = os.extsep.join((PKGSRC, 'py'))
+PKGDIR = pathlib.Path(hipposcraper.__file__).absolute().parent
 
-logging.basicConfig()
+logging.basicConfig(format='%(filename)s: %(message)s')
 
 LOGGER = logging.getLogger(PACKAGE)
-LOGGER.setLevel('DEBUG' if 'HIPPODEBUG' in os.environ else 'INFO')
+LOGGER.setLevel('DEBUG' if 'DEBUG' in os.environ else 'INFO')
+
+signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
 
 
 class InstallationDirectories:
@@ -60,7 +70,6 @@ class InstallationDirectories:
         self.__package = package
         self.__directories = {self.bin, self.config, self.site}
         self.__created = set()
-        self.resetdirs = atexit.register(self.unmake_directories)
 
     @property
     def directories(self):
@@ -95,7 +104,7 @@ class InstallationDirectories:
             value = value.decode()
         if isinstance(value, str):
             value = pathlib.Path(value)
-        if isinstance(value, path.Path):
+        if isinstance(value, pathlib.Path):
             self.__directories.add(value)
         else:
             raise ValueError('Invalid path: {}'.format(value))
@@ -106,13 +115,15 @@ class InstallationDirectories:
             value = value.decode()
         if isinstance(value, str):
             value = pathlib.Path(value)
-        if isinstance(value, path.Path):
+        if isinstance(value, pathlib.Path):
             self.__directories.discard(value)
         else:
             raise ValueError('Invalid path: {}'.format(value))
 
     def make_directories(self):
         """Create the installation directories"""
+        LOGGER.debug('Enabling directory removal upon exit...')
+        self.resetdirs = atexit.register(self.unmake_directories)
         LOGGER.info('Creating directories...')
         for path in self.directories:
             try:
@@ -129,13 +140,15 @@ class InstallationDirectories:
         for path in self.__created:
             try:
                 shutil.rmtree(path)
-                LOGGER.warning('Removed: %s', path)
+                LOGGER.warning('Removed %s', path)
             except FileNotFoundError:
                 LOGGER.warning('%s not found... where did it go?', path)
-        LOGGER.info('Directory removal complete.')
+        LOGGER.warning('Directory removal complete.')
 
-    def commitdirs(self):
+    def commit_directories(self):
         """Commit directory changes such that they will not be undone."""
+        LOGGER.debug('Disabling directory removal upon exit...')
+        atexit.unregister(self.unmake_directories)
         self.__created.clear()
         LOGGER.debug('Directory changes committed.')
 
@@ -144,23 +157,30 @@ def main():
     """Install hipposcraper."""
     dirs = InstallationDirectories(PACKAGE)
     dirs.make_directories()
-    signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
-    LOGGER.info('Installing executable in %s', str(dirs.bin))
-    shutil.copyfile(PRGSRC, dirs.bin / PROGRAM)
-    LOGGER.info('Setting file mode on %s', str(dirs.bin / PROGRAM))
-    os.chmod(dirs.bin / PROGRAM, mode=0o755)
     hipposcraper.hippoconfig()
-    LOGGER.info('Credentials saved in %s', str(hipposcraper.CONFIG_HOME))
-    pkgdir = dirs.site / PACKAGE
-    if pkgdir.exists():
-        LOGGER.info('Removing old package directory...')
-        shutil.rmtree(pkgdir, ignore_errors=True)
-    LOGGER.info('Installing package in %s', str(pkgdir))
-    shutil.copytree(PKGSRC, os.path.join(site.getusersitepackages(), PACKAGE))
-    LOGGER.info('Committing directory changes...')
-    dirs.commitdirs()
+    LOGGER.debug('Credentials saved in %s', str(hipposcraper.CONFIG_HOME))
+    LOGGER.debug('Removing Python bytecode from source tree...')
+    for path in PKGDIR.rglob('__pycache__'):
+        shutil.rmtree(path)
+    LOGGER.debug('Python bytecode removed.')
+    if (dirs.site / PACKAGE).exists():
+        LOGGER.info('Removing existing installation...')
+        shutil.rmtree(dirs.site / PACKAGE)
+        LOGGER.debug('Installation removed.',)
+    LOGGER.info('Installing package at %s...',  str(dirs.site / PACKAGE))
+    shutil.copytree(PKGDIR, dirs.site / PACKAGE)
+    LOGGER.debug('Package installed.',)
+    for name, src in SCRIPTS.items():
+        dest = dirs.bin / name
+        LOGGER.info('Installing executable %s at %s...', name, str(dest))
+        shutil.copyfile(src, dest)
+        LOGGER.debug('%s installed.', name)
+        LOGGER.debug('Setting file mode to %03o on %s...', 0o755, str(dest))
+        dest.chmod(0o755)
+    LOGGER.debug('Committing directory changes...')
+    dirs.commit_directories()
     LOGGER.info('Installation complete.')
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

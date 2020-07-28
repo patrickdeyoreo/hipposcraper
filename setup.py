@@ -7,7 +7,7 @@ here = pathlib.Path(__file__).parent.resolve()
 
 setuptools.setup(
     name="hipposcraper",
-    version="2.0.0",
+    version="2.0.1",
     author="Patrick DeYoreo",
     author_email="pdeyoreo@gmail.com",
     description="Create Holberton School project skeletons and documentation.",
@@ -34,6 +34,6 @@ setuptools.setup(
     python_requires='>=3.4',
     install_requires=[
         'beautifulsoup4 >=4.8.2, <5',
-        'lxml >=4.5.2, <5',
+        'requests >=2.24, <3'
     ],
 )

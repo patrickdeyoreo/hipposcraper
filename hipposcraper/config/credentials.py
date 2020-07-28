@@ -4,6 +4,7 @@ Configure user credentials.
 """
 import json
 import os
+import shutil
 
 import hipposcraper
 
@@ -13,7 +14,7 @@ class Credentials(dict):
     Save, load, and allow access to hipposcraper credentials.
     """
     __basename = 'credentials.json'
-    __datainfo = {
+    __iteminfo = {
         'author': 'Name of author',
         'github_username': 'GitHub username',
         'holberton_username': 'Holberton username',
@@ -22,33 +23,43 @@ class Credentials(dict):
 
     def __init__(self, load=False, **kwgs):
         """Initialize a credentials dictionary."""
-        super().__init__((key, kwgs.get(key)) for key in self.__datainfo)
+        super().__init__((key, kwgs.get(key)) for key in self.__iteminfo)
         if load:
             self.load()
 
     def __setitem__(self, key, value):
         """Only set the values of recognized items."""
-        if key not in self.__datainfo:
+        if key not in self.__iteminfo:
             raise KeyError("Bad credential key")
         super().__setitem__(key, value)
 
     def __delitem__(self, key):
         """Reset values rather than removing items."""
-        if key in self.__datainfo:
+        if key in self.__iteminfo:
             super().__setitem__(key, None)
         else:
             super().__delitem__(key)
 
     @property
+    def basename(self):
+        """Get the name of the credentials file."""
+        return self.__basename
+
+    @property
+    def dirname(self):
+        """Get a path to the config directory."""
+        return hipposcraper.CONFIG_HOME
+
+    @property
     def path(self):
-        """Get the path to the credential config file."""
-        return os.path.join(hipposcraper.CONFIG_HOME, self.__basename)
+        """Get a path to the credentials file."""
+        return os.path.join(self.dirname, self.basename)
 
     def info(self, key):
-        """Get a description of a credential item."""
-        if key not in self.__datainfo:
+        """Get a description of a credential."""
+        if key not in self.__iteminfo:
             raise KeyError("Bad credential key")
-        return self.__datainfo[key]
+        return self.__iteminfo[key]
 
     def load(self):
         """Load credentials and return the path."""
@@ -58,7 +69,18 @@ class Credentials(dict):
 
     def save(self):
         """Save credentials and return the path."""
+        try:
+            if not os.path.isdir(self.dirname):
+                os.remove(self.dirname)
+        except FileNotFoundError:
+            pass
+        try:
+            if not os.path.isdir(self.dirname):
+                os.mkdir(self.dirname)
+        except FileExistsError:
+            pass
+
         with open(self.path, 'w') as ostream:
             json.dump(dict(self), ostream)
-            print(file=ostream)
+            ostream.write('\n')
         return self.path

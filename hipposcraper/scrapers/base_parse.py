@@ -8,7 +8,7 @@ import sys
 from bs4 import BeautifulSoup
 import requests
 
-from .. configuration import Credentials
+from .. config import Credentials
 
 
 class BaseParse(object):
