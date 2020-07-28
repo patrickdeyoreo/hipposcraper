@@ -8,7 +8,7 @@ import sys
 from bs4 import BeautifulSoup
 import requests
 
-from .. config import Credentials
+from .. import config
 
 
 class BaseParse(object):
@@ -17,23 +17,23 @@ class BaseParse(object):
     to use. Also contains general methods to initialize the scrape.
 
     Args:
-        link (str): link to the project page to scrape
+        url (str): url to the project page to scrape
 
     Attributes:
         json_data (dict): read json data from credentials.json
-        soup (obj): BeautifulSoup obj containing parsed link
-        dir_name (str): directory name of the link
+        soup (obj): BeautifulSoup obj containing parsed url
+        dir_name (str): directory name of the url
     """
 
-    def __init__(self, link=""):
-        self.hbtn_link = link
-        self.json_data = Credentials(load=True)
+    def __init__(self, url, credentials=None):
+        self.hbtn_link = url
+        self.json_data = credentials or config.Credentials(load=True)
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
     @property
     def hbtn_link(self):
-        """Getter for hbtn link
+        """Getter for hbtn url
 
         Returns:
             hbtn_link (str): value of the corresponding private attribute
@@ -42,23 +42,23 @@ class BaseParse(object):
 
     @hbtn_link.setter
     def hbtn_link(self, value):
-        """Setter for hbtn link
+        """Setter for hbtn url
 
         Must contain holberton's url format for projects.
 
         Args:
-            value (str): comes from argv[1] as the project link
+            value (str): comes from argv[1] as the project url
         """
         valid_link = "intranet.hbtn.io/projects"
         while valid_link not in value:
-            print("[ERROR] Invalid link (must be on intranet.hbtn.io)")
-            value = input("Enter link to project: ")
+            print("[ERROR] Invalid url (must be on intranet.hbtn.io)")
+            value = input("Enter url to project: ")
         self.__hbtn_link = value
 
     def get_soup(self):
         """Method that parses the `hbtn_link` with BeautifulSoup
 
-        Then requests for the html of the link, and sets it into `soup`.
+        Then requests for the html of the url, and sets it into `soup`.
 
         Returns:
             soup (obj): BeautifulSoup parsed html object

@@ -27,7 +27,7 @@ import hipposcraper
 from . import config
 
 
-def parse_args():
+def parse_kwgs():
     """Parse arguments passed by caller."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--author-name', dest='author',
@@ -38,33 +38,31 @@ def parse_args():
                         default=None, help='holberton intranet username')
     parser.add_argument('-p', '--holberton-pass', dest='holberton_password',
                         default=None, help='holberton intranet password')
-    kwargs = vars(parser.parse_args())
-    return ((key, value) for key, value in kwargs.items() if value is not None)
+    kwgs = vars(parser.parse_args())
+    return {key: value for key, value in kwgs.items() if value is not None}
 
 
-def hippoconfig():
+def hippoconfig(**kwgs):
     """Create and modify user config."""
     print("Hippoconfig (v{})".format(hipposcraper.__version__))
     data = config.Credentials()
-    if len(sys.argv) > 1:
-        try:
-            print("Loaded configuration from {}".format(
-                data.load().replace(os.path.expanduser('~'), '~', 1)
-            ))
-            print('Existing data:')
-            pprint.pprint(data)
-        except FileNotFoundError:
-            print("No data found.")
-        except json.JSONDecodeError:
-            print("Unable to load data from invalid JSON.")
-        except OSError:
-            print("Unable to load data.")
-        print("Updating configuration...")
-        data.update(parse_args())
-    else:
-        data.update(
-            (key, input('{}: '.format(data.info(key)))) for key in data)
-    print("New data:")
+    try:
+        print("Loaded config from {}".format(
+            data.load().replace(os.path.expanduser('~'), '~', 1)
+        ))
+        print('Configuration:')
+        pprint.pprint(data)
+    except FileNotFoundError:
+        print("No existing config found.")
+    except json.JSONDecodeError:
+        print("Unable to load config from invalid JSON.")
+    except OSError:
+        print("Unable to load config.")
+    if not kwgs:
+        kwgs = {key: input('{}: '.format(data.info(key))) for key in data}
+    print("Updating config...")
+    data.update(kwgs)
+    print("Configuration:")
     pprint.pprint(data)
     print("Saved configuration to {}".format(
         data.save().replace(os.path.expanduser('~'), '~', 1)
@@ -72,4 +70,4 @@ def hippoconfig():
 
 
 if __name__ == '__main__':
-    hippoconfig()
+    sys.exit(hippoconfig(**parse_kwgs()))

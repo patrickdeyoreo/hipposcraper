@@ -10,7 +10,7 @@ from . hippodoc import hippodoc
 from . main import main
 
 __license__ = 'GPL3'
-__version__ = '2.0.1'
+__version__ = '2.0.2'
 
 CONFIG_HOME = os.path.join(os.path.abspath(os.getenv(
     'XDG_CONFIG_HOME', os.path.join(os.path.expanduser('~'), '.config')

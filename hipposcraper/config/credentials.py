@@ -4,7 +4,6 @@ Configure user credentials.
 """
 import json
 import os
-import shutil
 
 import hipposcraper
 
@@ -21,16 +20,24 @@ class Credentials(dict):
         'holberton_password': 'Holberton password',
     }
 
-    def __init__(self, load=False, **kwgs):
+    def __init__(self, load=False, ignore_errors=(), **kwgs):
         """Initialize a credentials dictionary."""
-        super().__init__((key, kwgs.get(key)) for key in self.__iteminfo)
+        ignore_errors = tuple(ignore_errors)
         if load:
-            self.load()
+            try:
+                with open(self.path, 'r') as istream:
+                    kwgs.update({
+                        key: value for key, value in json.load(istream).items()
+                        if key not in kwgs
+                    })
+            except ignore_errors:
+                pass
+        super().__init__({key: kwgs.get(key) for key in self.__iteminfo})
 
     def __setitem__(self, key, value):
         """Only set the values of recognized items."""
         if key not in self.__iteminfo:
-            raise KeyError("Bad credential key")
+            raise KeyError('Bad credential key: {}'.format(key))
         super().__setitem__(key, value)
 
     def __delitem__(self, key):
@@ -58,17 +65,25 @@ class Credentials(dict):
     def info(self, key):
         """Get a description of a credential."""
         if key not in self.__iteminfo:
-            raise KeyError("Bad credential key")
+            raise KeyError('Bad credential key: {}'.format(key))
         return self.__iteminfo[key]
 
-    def load(self):
+    def load(self, ignore_errors=()):
         """Load credentials and return the path."""
-        with open(self.path, 'r') as istream:
-            self.update(**json.load(istream))
+        ignore_errors = tuple(ignore_errors)
+        try:
+            with open(self.path, 'r') as istream:
+                self.update({
+                    key: value for key, value in json.load(istream).items()
+                    if key in self.__iteminfo
+                })
+        except ignore_errors:
+            pass
         return self.path
 
-    def save(self):
+    def save(self, ignore_errors=()):
         """Save credentials and return the path."""
+        ignore_errors = tuple(ignore_errors)
         try:
             if not os.path.isdir(self.dirname):
                 os.remove(self.dirname)
@@ -79,8 +94,10 @@ class Credentials(dict):
                 os.mkdir(self.dirname)
         except FileExistsError:
             pass
-
-        with open(self.path, 'w') as ostream:
-            json.dump(dict(self), ostream)
-            ostream.write('\n')
+        try:
+            with open(self.path, 'w') as ostream:
+                json.dump(self, ostream)
+                print(file=ostream)
+        except ignore_errors:
+            pass
         return self.path

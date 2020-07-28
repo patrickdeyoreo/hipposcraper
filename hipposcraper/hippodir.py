@@ -3,6 +3,7 @@
 hippodir entry point
 usage: hippodir.py URL ...
 """
+import argparse
 import os
 import sys
 
@@ -10,24 +11,12 @@ import hipposcraper
 from . import scrapers
 
 
-def get_args():
-    """Method that grabs argv
-
-    Returns:
-        link (str): argv[1]
-    """
-    arg = sys.argv[1:]
-    count = len(arg)
-
-    if count > 1:
-        print("[ERROR] Too many arguments (must be one)")
-        sys.exit()
-    elif count == 0:
-        print("[ERROR] Too few arguments (must be one)")
-        sys.exit()
-
-    link = sys.argv[1]
-    return link
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest='urls', nargs='+', action='append', metavar='URL',
+                        help='URLs of projects on intranet.hbtn.io')
+    return parser.parse_args()
 
 
 def set_permissions():
@@ -40,17 +29,10 @@ def set_permissions():
         print("[ERROR] Failed to set permissions")
 
 
-def hippodir():
-    """Entry point for hippodir
-
-    Scrapes project type (low level, high level, or system engineer),
-    then it checks project type to execute appropriate scrapes.
-    """
-    link = get_args()
-
-    print("Hippodir (v{})".format(hipposcraper.__version__))
+def create_dir(url, credentials=None):
+    """Create a directory for a project given its URL."""
     print("Creating project:")
-    parse_data = scrapers.BaseParse(link)
+    parse_data = scrapers.BaseParse(url, credentials=credentials)
 
     parse_data.find_directory()
     parse_data.create_directory()
@@ -112,5 +94,18 @@ def hippodir():
     print("Project all set!")
 
 
+def hippodir():
+    """
+    Entry point for hippodir
+
+    Scrapes project type (low level, high level, or system engineer),
+    then it checks project type to execute appropriate scrapes.
+    """
+    args = parse_args()
+    print("Hippodir (v{})".format(hipposcraper.__version__))
+    for url in args.urls:
+        create_dir(url)
+
+
 if __name__ == "__main__":
-    hippodir()
+    sys.exit(hippodir())

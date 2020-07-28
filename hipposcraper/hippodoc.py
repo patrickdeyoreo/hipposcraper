@@ -3,43 +3,25 @@
 hippodoc entry point
 usage: hippodoc.py URL ...
 """
+import argparse
 import sys
 
 import hipposcraper
 from . import scrapers
 
 
-def get_args():
-    """Method that grabs argv
-
-    Returns:
-        link (str): argv[1]
-    """
-    arg = sys.argv[1:]
-    count = len(arg)
-
-    if count > 1:
-        print("[ERROR] Too many arguments (must be one)")
-        sys.exit()
-    elif count == 0:
-        print("[ERROR] Too few arguments (must be one)")
-        sys.exit()
-
-    link = sys.argv[1]
-    return link
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(dest='urls', nargs='+', action='append', metavar='URL',
+                        help='URLs of projects on intranet.hbtn.io')
+    return parser.parse_args()
 
 
-def hippodoc():
-    """Entry point for hipporeader
-
-    Scrapes for specific text to create a README automatically.
-    """
-
-    link = get_args()
-
-    print("Hippodoc (v{})".format(hipposcraper.__version__))
+def create_doc(url, credentials=None):
+    """Create a README for a project given its URL."""
     print("Creating README.md:")
-    parse_data = scrapers.BaseParse(link)
+    parse_data = scrapers.BaseParse(url, credentials=credentials)
 
     sys.stdout.write("  -> Scraping information... ")
     # Creating scraping object
@@ -54,12 +36,24 @@ def hippodoc():
     r_scraper.write_info()
     r_scraper.write_tasks()
 
-    author = parse_data.json_data["author"]
-    user = parse_data.json_data["github_username"]
-    r_scraper.write_footer(author, user, "https://github.com/{}".format(user))
+    author = parse_data.json_data['author']
+    user = parse_data.json_data['github_username']
+    r_scraper.write_footer(author, user, 'github.com/{}'.format(user))
 
     print("README.md all set!")
 
 
+def hippodoc():
+    """
+    Entry point for hippodoc
+
+    Scrapes for specific text to create a README automatically.
+    """
+    args = parse_args()
+    print("Hippodoc (v{})".format(hipposcraper.__version__))
+    for url in args.urls:
+        create_doc(url)
+
+
 if __name__ == "__main__":
-    hippodoc()
+    sys.exit(hippodoc())
