@@ -1,16 +1,21 @@
 ![github version](https://d25lcipzij17d.cloudfront.net/badge.svg?id=gh&type=6&v=1.1.1&x2=0)
-# Hipposcraper - Python Scripts for Automating Holberton Projects
+# Hipposcraper
 
-### [STATUS] This repo is no longer maintained by [Derrick Gee](https://github.com/kai-dg) and [Brennan D Baraban](https://github.com/bdbaraban) starting 6/22/2019, please ask around or on the Holberton Slack to find someone who is maintaining a fork of this repo if you are looking for an updated version of this scraper.
+## Create Directory Skeletons and READMEs for Holberton School Projects
+
+This repo is now being maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
+Feel welcome to get in touch with any questions, comments, contributions, or
+criticisms. If you would like to contribute, you should totally do that! Take a
+look at the source code and send me a message (either on Slack or by email) or
+submit a pull request and I'll check it out. I assure you there is much to do.
 
 <p align="center">
   <img src="http://www.holbertonschool.com/holberton-logo.png">
 </p>
 
 The Hipposcraper automates file template creation for Holberton projects. The 
-program takes a link to a Holberton School project, scrapes the webpage, and 
-creates the corresponding directory and files. The Hipposcraper currently supports 
-the following: 
+program takes a Holberton School project URL, scrapes the webpage, and creates
+the corresponding directory and files. The Hipposcraper supports the following: 
 
 | System Engineering    | Low-Level Programming | Higher-Level Programming      |
 | --------------------- | --------------------- | ----------------------------- |
@@ -24,28 +29,72 @@ the following:
 
 ## Getting Started :wrench:
 
-### IMPORTANT: Make sure your version is up to date (at the top of the readme), running hippoproject or hipporead will display the version.
-
-Follow these instructions to set up the Hipposcraper on your machine.
-
 ### Prerequisites
 
-The Hipposcraper relies on the Python packages Mechanize and BeautifulSoup4. 
-Installation of these packages requires pip. If you are on a Debian-based Linux 
-distribution:
+The Hipposcraper depends on the Python packages `requests` and `beautifulsoup4`. 
+The simplest way to install these packages is through `pip`.
+If `pip` is not installed, you may install it by running whichever of the
+following commands applies to you.
+
+##### On Arch Linux:
 
 ```
-sudo apt-get install pip
+sudo pacman -S python-pip
 ```
 
-Once pip has been installed, install Mechanize and BeautifulSoup4 as follows:
+##### On Debian and Ubuntu:
 
 ```
-pip install mechanize
-pip install beautifulsoup4
+sudo apt install python3-pip
+```
+
+##### On CentOS and RHEL:
+
+```
+sudo yum install epel-release 
+sudo yum install python-pip
+```
+
+##### On Fedora:
+
+```
+sudo dnf install python3
+```
+
+##### On OpenSUSE:
+
+```
+sudo zypper install python3-pip
+```
+
+Once `pip` available, install `requests` and `beautifulsoup4` as follows:
+
+```
+pip install --user -r requirements.txt
 ```
 
 Note that you may need to run the `--user` option when installing these packages.
+
+
+### Installation
+
+Clone the repository:
+
+```
+git clone https://github.com/patrickdeyoreo/hipposcraper
+```
+
+Enter the project directory:
+
+```
+cd hipposcraper
+```
+
+Run the setup script:
+
+```
+python3 setup.py install --user
+```
 
 ### Setup :key:
 
@@ -53,14 +102,14 @@ Note that you may need to run the `--user` option when installing these packages
 
 After cloning a local copy of the repository, enter your Holberton intranet 
 username and password as well as your GitHub name, username, and profile link 
-in the [credentials.json](./credentials.json) file.
+in a `credentials.json` file.
   - **Using `setup.sh`: Run `./setup.sh` to automatically setup the required information**
 
 **Setting Aliases**
 
 The Hipposcraper defines two separate Python scripts - one 
-([hippoproject.py](./hippoproject.py)) that creates projects, 
-and a second ([hipporead.py](./hipporead.py)) that creates 
+([hippodir.py](./hippodir.py)) that creates projects, 
+and a second ([hippodoc.py](./hippodoc.py)) that creates 
 `README.md` files. To run both simultaneously, you'll need to define an alias 
 to the script [hipposcraper.sh](./hipposcraper.sh).
 
@@ -76,13 +125,13 @@ Alternatievely, you can define separate aliases for each individual script. To
 define a project scraper alias:
 
 ```
-alias hippoproject='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcraper.py'
+alias hippodir='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcraper.py'
 ```
 
 And to define a `README.md` scraper alias:
 
 ```
-alias hipporead='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipporead.py'
+alias hippodoc='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hippodoc.py'
 ```
 
 *NOTE: This program only works with Python 2; ensure that your aliases 
@@ -104,13 +153,13 @@ Where `project_link` is the URL link to the Holberton School project to scrape.
 Alternatively, to run only the project scraper:
 
 ```
-~$ hippoproject project_link
+~$ hippodir project_link
 ```
 
 Or only the `README.md` scraper:
 
 ```
-~$ hipporead project_link
+~$ hippodoc project_link
 ```
 
 ### `check.sh` - Generated for checking formats on all required files
@@ -124,11 +173,11 @@ Or only the `README.md` scraper:
 * [hipposcraper.sh](./hipposcraper.sh)
   * A Bash script for running the entire Hipposcraper at once.
 
-* [hippoproject.py](./hippoproject.py)
+* [hippodir.py](./hippodir.py)
   * Python script that scrapes Holberton intranet webpage to create project 
 directories.
 
-* [hipporead.py](./hipporead.py)
+* [hippodoc.py](./hippodoc.py)
   * Python script that scrapes Holberton intranet webpage to create project 
 `README.md`.
 
