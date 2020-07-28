@@ -14,7 +14,7 @@ from . import scrapers
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(dest='urls', nargs='+', action='append', metavar='URL',
+    parser.add_argument(dest='urls', nargs='+', metavar='URL',
                         help='URLs of projects on intranet.hbtn.io')
     return parser.parse_args()
 
