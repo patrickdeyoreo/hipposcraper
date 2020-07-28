@@ -27,9 +27,17 @@ import pathlib
 import shutil
 import signal
 import site
+import subprocess
 import sys
 
-import hipposcraper
+try:
+    import hipposcraper
+except ImportError:
+    cmd = (sys.executable, '-m', 'pip', 'install', '--user', '-r', 'requirements.txt')
+    process = subprocess.run(cmd)
+    if process.returncode != 0:
+        sys.exit(1)
+    import hipposcraper
 
 PACKAGE = hipposcraper.__package__
 PROGRAM = PACKAGE
@@ -40,7 +48,7 @@ PRGSRC = os.extsep.join((PKGSRC, 'py'))
 logging.basicConfig()
 
 LOGGER = logging.getLogger(PACKAGE)
-LOGGER.setLevel('INFO')
+LOGGER.setLevel('DEBUG' if 'HIPPODEBUG' in os.environ else 'INFO')
 
 
 class InstallationDirectories:
@@ -48,53 +56,76 @@ class InstallationDirectories:
 
     def __init__(self, package=PACKAGE):
         """Initialize an installation directory configuration."""
-        LOGGER.info('Configuring installation directories for: %s', package)
+        LOGGER.info('Configuring installation directories for %s', package)
         self.__package = package
+        self.__directories = {self.bin, self.config, self.site}
         self.__created = set()
-        self.resetdirs = atexit.register(self.resetdirs)
+        self.resetdirs = atexit.register(self.unmake_directories)
+
+    @property
+    def directories(self):
+        """Get user bin directory"""
+        return self.__directories.copy()
 
     @property
     def bin(self):
         """Get user bin directory"""
-        if (self.home / '.bin').exists():
+        if (self.home / '.bin').is_dir():
             return self.home / '.bin'
         return self.home / '.local' / 'bin'
 
     @property
     def config(self):
-        """Get user config directory"""
+        """Get the path of the user config directory"""
         return pathlib.Path(hipposcraper.CONFIG_HOME)
 
     @property
     def home(self):
-        """Get user home directory"""
+        """Get the path of the user home directory"""
         return pathlib.Path.home()
 
     @property
     def site(self):
-        """Get user site direcotry"""
+        """Get the path of the user site direcotry"""
         return pathlib.Path(site.getusersitepackages())
 
-    @property
-    def directories(self):
-        """Get an iterable of all installation directories"""
-        return [x for x in vars(self).values() if isinstance(x, pathlib.Path)]
+    def register_directory(self, value):
+        """Add an installation directory"""
+        if isinstance(value, bytes):
+            value = value.decode()
+        if isinstance(value, str):
+            value = pathlib.Path(value)
+        if isinstance(value, path.Path):
+            self.__directories.add(value)
+        else:
+            raise ValueError('Invalid path: {}'.format(value))
 
-    def makedirs(self):
-        """Create installation directories"""
-        LOGGER.info('Creating installation directories...')
+    def unregister_directory(self, value):
+        """Discard an installation directory"""
+        if isinstance(value, bytes):
+            value = value.decode()
+        if isinstance(value, str):
+            value = pathlib.Path(value)
+        if isinstance(value, path.Path):
+            self.__directories.discard(value)
+        else:
+            raise ValueError('Invalid path: {}'.format(value))
+
+    def make_directories(self):
+        """Create the installation directories"""
+        LOGGER.info('Creating directories...')
         for path in self.directories:
             try:
                 path.mkdir(parents=True)
                 self.__created.add(path)
-                LOGGER.info('Created: %s', path)
+                LOGGER.info('Created %s', path)
             except FileExistsError:
-                LOGGER.info('%s already exists', path)
+                LOGGER.info('%s already exists.', path)
         LOGGER.info('Directory creation complete.')
 
-    def resetdirs(self):
+    def unmake_directories(self):
         """Remove directories created by the bound instance"""
-        LOGGER.warning('Removing installation directories...')
+        LOGGER.warning('Removing directories...')
         for path in self.__created:
             try:
                 shutil.rmtree(path)
@@ -104,22 +135,27 @@ class InstallationDirectories:
         LOGGER.info('Directory removal complete.')
 
     def commitdirs(self):
-        """Commit directory changes such that they may not be undone"""
+        """Commit directory changes such that they will not be undone."""
         self.__created.clear()
+        LOGGER.debug('Directory changes committed.')
 
 
 def main():
     """Install hipposcraper."""
     dirs = InstallationDirectories(PACKAGE)
-    dirs.makedirs()
+    dirs.make_directories()
     signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
-    LOGGER.info('Installing executable under: %s', str(dirs.bin))
+    LOGGER.info('Installing executable in %s', str(dirs.bin))
     shutil.copyfile(PRGSRC, dirs.bin / PROGRAM)
-    LOGGER.info('Setting file mode on: %s', str(dirs.bin))
+    LOGGER.info('Setting file mode on %s', str(dirs.bin / PROGRAM))
     os.chmod(dirs.bin / PROGRAM, mode=0o755)
-    credentials = hipposcraper.hippoconfig()
-    LOGGER.info('Credentials credentials written to: %s', str(credentials.filename))
-    LOGGER.info('Installing package under: %s', str(dirs.site))
+    hipposcraper.hippoconfig()
+    LOGGER.info('Credentials saved in %s', str(hipposcraper.CONFIG_HOME))
+    pkgdir = dirs.site / PACKAGE
+    if pkgdir.exists():
+        LOGGER.info('Removing old package directory...')
+        shutil.rmtree(pkgdir, ignore_errors=True)
+    LOGGER.info('Installing package in %s', str(pkgdir))
     shutil.copytree(PKGSRC, os.path.join(site.getusersitepackages(), PACKAGE))
     LOGGER.info('Committing directory changes...')
     dirs.commitdirs()
