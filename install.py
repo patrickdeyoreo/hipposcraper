@@ -3,20 +3,7 @@
 Install hipposcraper.
 
 Usage:
-    install.py [OPTIONS...]
-
-Options:
-    -a, --author=<author-name>
-        name of the author
-
-    -g, --github=<github-username>
-        github unsername
-
-    -p, --password=<holberton-password>
-        holberton intranet password
-
-    -u, --username=<holberton-username>
-        holberton intranet username
+    install.py
 """
 
 import atexit
@@ -29,34 +16,30 @@ import site
 import subprocess
 import sys
 
+THISDIR = pathlib.Path(__file__).parent.resolve()
+
+SCRIPTS = {path.stem: path for path in THISDIR.glob('hippo*.py')}
+
 try:
     import hipposcraper
 except ImportError:
     try:
         subprocess.run([
             sys.executable, '-m', 'pip', 'install', '--user', '-r',
-            str(pathlib.Path(__file__).absolute().parent / 'requirements.txt')
+            str(THISDIR / 'requirements.txt'),
         ], check=True)
     except subprocess.CalledProcessError as err:
         sys.exit(err.returncode)
     import hipposcraper
 
+PKGNAME = hipposcraper.__package__
 
-THISDIR = pathlib.Path(__file__).absolute().parent
-PACKAGE = hipposcraper.__package__
-SCRIPTS = {
-    'hippoconfig': THISDIR / 'hippoconfig.py',
-    'hippodir': THISDIR / 'hippodir.py',
-    'hippodoc': THISDIR / 'hippodoc.py',
-    'hipposcraper': THISDIR / 'hipposcraper.py',
-}
+PKGSRC = pathlib.Path(hipposcraper.__file__).absolute().parent
 
-PKGDIR = pathlib.Path(hipposcraper.__file__).absolute().parent
+LOGGER = logging.getLogger(PKGNAME)
+LOGGER.setLevel('DEBUG' if 'DEBUG' in os.environ else 'INFO')
 
 logging.basicConfig(format='%(filename)s: %(message)s')
-
-LOGGER = logging.getLogger(PACKAGE)
-LOGGER.setLevel('DEBUG' if 'DEBUG' in os.environ else 'INFO')
 
 signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
 
@@ -64,7 +47,7 @@ signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
 class InstallationDirectories:
     """Prepare installation directories."""
 
-    def __init__(self, package=PACKAGE):
+    def __init__(self, package=PKGNAME):
         """Initialize an installation directory configuration."""
         LOGGER.info('Configuring installation directories for %s', package)
         self.__package = package
@@ -123,7 +106,7 @@ class InstallationDirectories:
     def make_directories(self):
         """Create the installation directories"""
         LOGGER.debug('Enabling directory removal upon exit...')
-        self.resetdirs = atexit.register(self.unmake_directories)
+        atexit.register(self.unmake_directories)
         LOGGER.info('Creating directories...')
         for path in self.directories:
             try:
@@ -155,28 +138,28 @@ class InstallationDirectories:
 
 def main():
     """Install hipposcraper."""
-    dirs = InstallationDirectories(PACKAGE)
+    dirs = InstallationDirectories(PKGNAME)
     dirs.make_directories()
-    hipposcraper.hippoconfig()
-    LOGGER.debug('Credentials saved in %s', str(hipposcraper.CONFIG_HOME))
     LOGGER.debug('Removing Python bytecode from source tree...')
-    for path in PKGDIR.rglob('__pycache__'):
+    for path in PKGSRC.rglob('__pycache__'):
         shutil.rmtree(path)
     LOGGER.debug('Python bytecode removed.')
-    if (dirs.site / PACKAGE).exists():
+    dest = dirs.site / PKGNAME
+    if dest.exists():
         LOGGER.info('Removing existing installation...')
-        shutil.rmtree(dirs.site / PACKAGE)
+        shutil.rmtree(dest)
         LOGGER.debug('Installation removed.',)
-    LOGGER.info('Installing package at %s...',  str(dirs.site / PACKAGE))
-    shutil.copytree(PKGDIR, dirs.site / PACKAGE)
+    LOGGER.info('Installing %s package at %s...', PKGNAME, str(dest))
+    shutil.copytree(PKGSRC, dest)
     LOGGER.debug('Package installed.',)
     for name, src in SCRIPTS.items():
         dest = dirs.bin / name
-        LOGGER.info('Installing executable %s at %s...', name, str(dest))
+        LOGGER.info('Installing %s executable at %s...', name, str(dest))
         shutil.copyfile(src, dest)
         LOGGER.debug('%s installed.', name)
-        LOGGER.debug('Setting file mode to %03o on %s...', 0o755, str(dest))
-        dest.chmod(0o755)
+        mode = dest.stat().st_mode & 0o7777 | 0o100
+        LOGGER.debug('Changing file mode to %03o on %s...', mode, str(dest))
+        dest.chmod(mode)
     LOGGER.debug('Committing directory changes...')
     dirs.commit_directories()
     LOGGER.info('Installation complete.')

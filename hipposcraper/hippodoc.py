@@ -4,16 +4,18 @@ hippodoc entry point
 usage: hippodoc.py URL ...
 """
 import argparse
+import json
 import sys
 
 import hipposcraper
+from . hippoconfig import Credentials, create_config
 from . import scrapers
 
 
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(dest='urls', nargs='+', metavar='URL',
+    parser.add_argument(metavar='URL', nargs='+', dest='urls',
                         help='URLs of projects on intranet.hbtn.io')
     return parser.parse_args()
 
@@ -36,11 +38,13 @@ def create_doc(url, credentials=None):
     r_scraper.write_info()
     r_scraper.write_tasks()
 
-    author = parse_data.json_data['author']
-    user = parse_data.json_data['github_username']
+    author = parse_data.user_data['author']
+    user = parse_data.user_data['github_username']
     r_scraper.write_footer(author, user, 'github.com/{}'.format(user))
 
     print("README.md all set!")
+
+    return r_scraper.readme
 
 
 def hippodoc():
@@ -51,8 +55,16 @@ def hippodoc():
     """
     args = parse_args()
     print("Hippodoc (v{})".format(hipposcraper.__version__))
+    try:
+        user_data = Credentials(load=True)
+    except (FileNotFoundError, json.JSONDecodeError):
+        user_data = create_config()
     for url in args.urls:
-        create_doc(url)
+        try:
+            create_doc(url, credentials=user_data)
+        except ValueError as err:
+            if getattr(err, 'args', False):
+                print('[ERROR]', *err.args, sep=': ', file=sys.stderr)
 
 
 if __name__ == "__main__":

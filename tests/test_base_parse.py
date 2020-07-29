@@ -22,7 +22,7 @@ class TestBaseParse(unittest.TestCase):
         self.assertIn("scrapers.BaseParse", str(self.parse))
 
     def test_json_data(self):
-        self.assertIsInstance(self.parse.json_data, dict)
+        self.assertIsInstance(self.parse.user_data, dict)
 
     def test_get_soup(self):
         self.parse.get_soup()

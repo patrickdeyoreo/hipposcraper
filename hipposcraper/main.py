@@ -4,8 +4,7 @@ import argparse
 import json
 import sys
 
-from . config import Credentials
-from . hippoconfig import hippoconfig
+from . hippoconfig import Credentials, create_config
 from . hippodir import create_dir
 from . hippodoc import create_doc
 
@@ -13,7 +12,7 @@ from . hippodoc import create_doc
 def parse_args():
     """Parse command line arguments."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(dest='urls', nargs='+', metavar='URL',
+    parser.add_argument(metavar='URL', nargs='+', dest='urls',
                         help='URLs of projects on intranet.hbtn.io')
     return parser.parse_args()
 
@@ -24,13 +23,12 @@ def main():
     """
     args = parse_args()
     try:
-        credentials = Credentials(load=True)
+        user_data = Credentials(load=True)
     except (FileNotFoundError, json.JSONDecodeError):
-        hippoconfig()
-        credentials = Credentials(load=True)
+        user_data = create_config()
     for url in args.urls:
-        create_dir(url, credentials=credentials)
-        create_doc(url, credentials=credentials)
+        create_dir(url, credentials=user_data)
+        create_doc(url, credentials=user_data)
 
 
 if __name__ == "__main__":

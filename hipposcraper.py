@@ -6,8 +6,8 @@ usage: hipposcraper.py URL ...
 """
 import sys
 
-import hipposcraper
+import hipposcraper  # pylint: disable=import-self
 
 
 if __name__ == '__main__':
-    sys.exit(hipposcraper.main())
+    sys.exit(hipposcraper.main())  # pylint: disable=no-member

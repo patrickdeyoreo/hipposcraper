@@ -24,10 +24,10 @@ import pprint
 import sys
 
 import hipposcraper
-from . import config
+from . config import Credentials
 
 
-def parse_kwgs():
+def parse_kwargs():
     """Parse arguments passed by caller."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--author-name', dest='author',
@@ -38,20 +38,19 @@ def parse_kwgs():
                         default=None, help='holberton intranet username')
     parser.add_argument('-p', '--holberton-pass', dest='holberton_password',
                         default=None, help='holberton intranet password')
-    kwgs = vars(parser.parse_args())
-    return {key: value for key, value in kwgs.items() if value is not None}
+    args = parser.parse_args()
+    return {key: arg for key, arg in vars(args).items() if arg is not None}
 
 
-def hippoconfig(**kwgs):
-    """Create and modify user config."""
-    print("Hippoconfig (v{})".format(hipposcraper.__version__))
-    data = config.Credentials()
+def create_config(**kwgs):
+    """Create and update hipposcraper config."""
+    user_data = Credentials(load=False)
     try:
         print("Loaded config from {}".format(
-            data.load().replace(os.path.expanduser('~'), '~', 1)
+            user_data.load().replace(os.path.expanduser('~'), '~', 1)
         ))
         print('Configuration:')
-        pprint.pprint(data)
+        pprint.pprint(user_data)
     except FileNotFoundError:
         print("No existing config found.")
     except json.JSONDecodeError:
@@ -59,15 +58,30 @@ def hippoconfig(**kwgs):
     except OSError:
         print("Unable to load config.")
     if not kwgs:
-        kwgs = {key: input('{}: '.format(data.info(key))) for key in data}
+        kwgs = {
+            key: input('{}: '.format(user_data.info(key))) or value
+            for key, value in user_data.items()
+        }
     print("Updating config...")
-    data.update(kwgs)
+    user_data.update(kwgs)
     print("Configuration:")
-    pprint.pprint(data)
+    pprint.pprint(user_data)
     print("Saved configuration to {}".format(
-        data.save().replace(os.path.expanduser('~'), '~', 1)
+        user_data.save().replace(os.path.expanduser('~'), '~', 1)
     ))
+    return user_data
+
+
+def hippoconfig():
+    """
+    Entry point for hippoconfig.
+
+    Create and update user configuration data.
+    """
+    kwargs = parse_kwargs()
+    print("Hippoconfig (v{})".format(hipposcraper.__version__))
+    create_config(**kwargs)
 
 
 if __name__ == '__main__':
-    sys.exit(hippoconfig(**parse_kwgs()))
+    sys.exit(hippoconfig())

@@ -8,7 +8,7 @@ import sys
 from bs4 import BeautifulSoup
 import requests
 
-from .. import config
+from .. config import Credentials
 
 
 class BaseParse(object):
@@ -20,14 +20,14 @@ class BaseParse(object):
         url (str): url to the project page to scrape
 
     Attributes:
-        json_data (dict): read json data from credentials.json
+        user_data (dict): read json data from credentials.json
         soup (obj): BeautifulSoup obj containing parsed url
         dir_name (str): directory name of the url
     """
 
     def __init__(self, url, credentials=None):
         self.hbtn_link = url
-        self.json_data = credentials or config.Credentials(load=True)
+        self.user_data = credentials or Credentials(load=True)
         self.soup = self.get_soup()
         self.dir_name = self.find_directory()
 
@@ -68,8 +68,8 @@ class BaseParse(object):
             resp = session.get(auth_url)
             soup = BeautifulSoup(resp.content, features='html.parser')
             credentials = {
-                'user[login]': self.json_data.get('holberton_username'),
-                'user[password]': self.json_data.get('holberton_password'),
+                'user[login]': self.user_data.get('holberton_username'),
+                'user[password]': self.user_data.get('holberton_password'),
                 'authenticity_token': soup.find(
                     'input', {'name': 'authenticity_token'}
                 ).get('value'),

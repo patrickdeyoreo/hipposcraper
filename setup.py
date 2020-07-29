@@ -33,7 +33,7 @@ setuptools.setup(
     },
     python_requires='>=3.4',
     install_requires=[
-        'beautifulsoup4 >=4.8.2, <5',
-        'requests >=2.24, <3'
+        'beautifulsoup4 >=4.8.2',
+        'requests >=2.24'
     ],
 )
