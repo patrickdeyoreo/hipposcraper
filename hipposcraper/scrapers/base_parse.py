@@ -92,7 +92,7 @@ class BaseParse(object):
     def find_directory(self):
         """Scrape project directory names."""
         anchor = self.soup.find(string=re.compile("Directory: "))
-        if isinstance(anchor, Tag) and isinstance(anchor.next_element, Tag):
+        if anchor is not None and isinstance(anchor.next_element, Tag):
             return anchor.next_element.text
         return None
 
@@ -110,6 +110,6 @@ class BaseParse(object):
     def project_type_check(self):
         """Scrape project types."""
         anchor = self.soup.find(string=re.compile("GitHub repository: "))
-        if isinstance(anchor, Tag) and isinstance(anchor.next_sibling, Tag):
+        if anchor is not None and isinstance(anchor.next_sibling, Tag):
             return anchor.next_sibling.text
         return None
