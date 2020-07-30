@@ -5,7 +5,7 @@ import os
 import re
 import sys
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import requests
 
 from .. config import Credentials
@@ -49,11 +49,18 @@ class BaseParse(object):
         Args:
             value (str): comes from argv[1] as the project url
         """
-        valid_link = "intranet.hbtn.io/projects"
-        while valid_link not in value:
-            print("[ERROR] Invalid url (must be on intranet.hbtn.io)")
-            value = input("Enter url to project: ")
-        self.__hbtn_link = value
+        url_prefix = "intranet.hbtn.io/projects"
+        value = value.lower()
+        if value.startswith('http'):
+            value = value[4:]
+        if value.startswith('s'):
+            value = value[1:]
+        if value.startswith('://'):
+            value = value[3:]
+        while not value.statswith(url_prefix):
+            print("[ERROR] Invalid URL. Projects should be under",  url_prefix)
+            value = input("Enter URL to project: ")
+        self.__hbtn_link = 'https://{}'.format(value)
 
     def get_soup(self):
         """Method that parses the `hbtn_link` with BeautifulSoup
@@ -83,39 +90,32 @@ class BaseParse(object):
                 resp = session.get(self.hbtn_link)
                 soup = BeautifulSoup(resp.content, features='html.parser')
             except AttributeError:
-                print("[ERROR] Login failed (are your credentials correct?")
+                print("[ERROR] Login failed. Check your credentials.")
                 sys.exit()
         print("done")
         return soup
 
     def find_directory(self):
-        """Method that scrapes for project's directory name
-
-        Sets project's directory's name to `dir_name`
-        """
-        find_dir = self.soup.find(string=re.compile("Directory: "))
-        find_dir_text = find_dir.next_element.text
-        return find_dir_text
+        """Scrape project directory names."""
+        anchor = self.soup.find(string=re.compile("Directory: "))
+        if isinstance(anchor, Tag) and isinstance(anchor.next_element, Tag):
+            return anchor.next_element.text
+        return None
 
     def create_directory(self):
-        """Method that creates appropriate directory"""
-        sys.stdout.write("  -> Creating directory... ")
+        """Create appropriate directory trees."""
+        print("  -> Creating directory {}".format(self.dir_name))
         try:
             os.makedirs(self.dir_name, mode=0o755, exist_ok=False)
             os.chdir(self.dir_name)
             print("done")
         except OSError:
-            print("[ERROR] Failed to create directory - does it already exist?")
-            sys.exit()
+            print("[ERROR] Failed to create directory. Does it already exist?")
+            raise
 
     def project_type_check(self):
-        """Method that checks the project's type
-
-        Checks for which scraper to use by scraping 'Github repository: '
-
-        Returns:
-            project (str): scraped project type
-        """
-        find_project = self.soup.find(string=re.compile("GitHub repository: "))
-        project = find_project.next_sibling.text
-        return project
+        """Scrape project types."""
+        anchor = self.soup.find(string=re.compile("GitHub repository: "))
+        if isinstance(anchor, Tag) and isinstance(anchor.next_sibling, Tag):
+            return anchor.next_sibling.text
+        return None

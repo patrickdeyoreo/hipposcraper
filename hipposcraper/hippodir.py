@@ -30,49 +30,31 @@ def set_permissions():
 
 def create_dir(url, credentials=None):
     """Create a directory for a project given its URL."""
+
     print("Creating project:")
-    parse_data = scrapers.BaseParse(url, credentials=credentials)
+    # Acquiring and parsing project data
+    project_data = scrapers.BaseParse(url, credentials=credentials)
+    project_type = project_data.project_type_check()
 
-    parse_data.find_directory()
-    parse_data.create_directory()
-
-    project_type = parse_data.project_type_check()
-    if "high" in project_type:
-        # Creating scraping objects
-        scraper = scrapers.HighScraper(parse_data.soup)
-
-    elif "low" in project_type:
-        # Creating scraping objects
-        scraper = scrapers.LowScraper(parse_data.soup)
-
-        # Writing files exclusive to low-level projects
-        scraper.write_putchar()
-        scraper.write_header()
-
-    elif "linux" in project_type:
-        # Creating scraping objects
-        scraper = scrapers.LowScraper(parse_data.soup)
-
-        # Writing files exclusive to low-level projects
-        scraper.write_putchar()
-        scraper.write_header()
-
-    elif "system" in project_type:
-        # Creating scraping objects
-        scraper = scrapers.SysScraper(parse_data.soup)
-
+    # Creating scraping objects
+    if "high" in project_type or "interview" in project_type:
+        scraper = scrapers.HighScraper(project_data.soup)
+    elif "low" in project_type or "linux" in project_type:
+        scraper = scrapers.LowScraper(project_data.soup)
+    elif "devops" in project_type:
+        scraper = scrapers.SysScraper(project_data.soup)
     else:
         raise ValueError('Failed to determine project type.')
 
+    # Creating project directory
+    project_data.create_directory()
     # Writing to files with scraped data
     scraper.write_files()
-
     # Creating test (main) files
-    scrapers.TestFileScraper(parse_data.soup).write_test_files()
+    scrapers.TestFileScraper(project_data.soup).write_test_files()
 
     print('Created project directory.')
-
-    return parse_data.dir_name
+    return project_data.dir_name
 
 
 def hippodir():

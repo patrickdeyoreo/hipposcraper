@@ -129,6 +129,8 @@ class LowScraper:
 
         Handles multiple file names by searching for ','.
         """
+        self.write_putchar()
+        self.write_header()
         i = 0
         sys.stdout.write("  -> Creating task files... ")
         for item in self.file_names:

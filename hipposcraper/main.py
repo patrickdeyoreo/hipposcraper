@@ -27,8 +27,16 @@ def main():
     except (FileNotFoundError, json.JSONDecodeError):
         user_data = create_config()
     for url in args.urls:
-        create_dir(url, credentials=user_data)
-        create_doc(url, credentials=user_data)
+        try:
+            create_dir(url, credentials=user_data)
+        except ValueError as err:
+            if getattr(err, 'args', False):
+                print('[ERROR]', *err.args, sep=': ', file=sys.stderr)
+        try:
+            create_doc(url, credentials=user_data)
+        except ValueError as err:
+            if getattr(err, 'args', False):
+                print('[ERROR]', *err.args, sep=': ', file=sys.stderr)
 
 
 if __name__ == "__main__":
