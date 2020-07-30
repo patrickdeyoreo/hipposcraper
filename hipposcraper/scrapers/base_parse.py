@@ -49,17 +49,11 @@ class BaseParse(object):
         Args:
             value (str): comes from argv[1] as the project url
         """
-        url_prefix = "intranet.hbtn.io/projects"
-        value = value.lower()
-        if value.startswith('http'):
-            value = value[4:]
-        if value.startswith('s'):
-            value = value[1:]
-        if value.startswith('://'):
-            value = value[3:]
-        while not value.statswith(url_prefix):
-            print("[ERROR] Invalid URL. Projects should be under",  url_prefix)
-            value = input("Enter URL to project: ")
+        host = 'intranet.hbtn.io'
+        if value.find('://'):
+            *_, value = value.partition('://')
+        if not value.startswith('{}/'.format(fqdn)):
+            raise ValueError("[ERROR] Host must be {}".format(host))
         self.__hbtn_link = 'https://{}'.format(value)
 
     def get_soup(self):
