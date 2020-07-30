@@ -52,7 +52,7 @@ class BaseParse(object):
         host = 'intranet.hbtn.io'
         if value.find('://'):
             *_, value = value.partition('://')
-        if not value.startswith('{}/'.format(fqdn)):
+        if not value.startswith('{}/'.format(host)):
             raise ValueError("[ERROR] Host must be {}".format(host))
         self.__hbtn_link = 'https://{}'.format(value)
 
