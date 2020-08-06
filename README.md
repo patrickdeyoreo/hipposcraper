@@ -33,38 +33,25 @@ the corresponding directory and files. The Hipposcraper supports the following:
 
 The Hipposcraper depends on the Python packages `requests` and `beautifulsoup4`. 
 The simplest way to install these packages is through `pip`.
-If `pip` is not installed, you may install it by running whichever of the
+If `pip` is not installed, you may install it using whichever of the
 following commands applies to you.
 
-##### On Arch Linux:
+#### On Arch Linux:
 
 ```
 sudo pacman -S python-pip
 ```
 
-##### On Debian and Ubuntu:
+#### On Debian and Ubuntu:
 
 ```
 sudo apt install python3-pip
 ```
 
-##### On CentOS and RHEL:
-
-```
-sudo yum install epel-release 
-sudo yum install python-pip
-```
-
-##### On Fedora:
+#### On Fedora:
 
 ```
 sudo dnf install python3
-```
-
-##### On OpenSUSE:
-
-```
-sudo zypper install python3-pip
 ```
 
 Once `pip` available, install `requests` and `beautifulsoup4` as follows:
@@ -72,9 +59,6 @@ Once `pip` available, install `requests` and `beautifulsoup4` as follows:
 ```
 pip install --user -r requirements.txt
 ```
-
-Note that you may need to run the `--user` option when installing these packages.
-
 
 ### Installation
 
@@ -90,88 +74,60 @@ Enter the project directory:
 cd hipposcraper
 ```
 
+#### To install using `setuptools`:
+
+Ensure you have the latest version of `setuptools`:
+
+```
+pip install -U --user setuptools
+```
+
 Run the setup script:
 
 ```
 python3 setup.py install --user
 ```
 
-### Setup :key:
+#### To install using a homemade installation script:
 
-**Setting User Information**
-
-After cloning a local copy of the repository, enter your Holberton intranet 
-username and password as well as your GitHub name, username, and profile link 
-in a `credentials.json` file.
-  - **Using `setup.sh`: Run `./setup.sh` to automatically setup the required information**
-
-**Setting Aliases**
-
-The Hipposcraper defines two separate Python scripts - one 
-([hippodir.py](./hippodir.py)) that creates projects, 
-and a second ([hippodoc.py](./hippodoc.py)) that creates 
-`README.md` files. To run both simultaneously, you'll need to define an alias 
-to the script [hipposcraper.sh](./hipposcraper.sh).
-
-First, open the script and enter the full pathname to the Hipposcraper 
-directory where directed. Then, if you work in a Bash shell, define the 
-following in your `.bashrc`:
+Run the installation script:
 
 ```
-alias hipposcraper='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcraper.sh'
+python3 install.py
 ```
-
-Alternatievely, you can define separate aliases for each individual script. To 
-define a project scraper alias:
-
-```
-alias hippodir='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hipposcraper.py'
-```
-
-And to define a `README.md` scraper alias:
-
-```
-alias hippodoc='./ENTER_FULL_PATHNAME_TO_SCRAPER_DIRECTORY_HERE/hippodoc.py'
-```
-
-*NOTE: This program only works with Python 2; ensure that your aliases 
-specify 'python2' (Mechanize is not supported by Python 3).*
 
 ---
 
 ## Usage :computer:
 
-After you have setup the proper aliases, you can run the Hipposcraper with the 
-following command:
+Run the Hipposcraper with the following command, where `URL` is the URL of a Holberton project:
 
 ```
-~$ hipposcraper project_link
+hipposcraper URL
 ```
 
-Where `project_link` is the URL link to the Holberton School project to scrape.
-
-Alternatively, to run only the project scraper:
+Alternatively, run only the project scraper:
 
 ```
-~$ hippodir project_link
+hippodir URL
 ```
 
-Or only the `README.md` scraper:
+Or run only the `README.md` scraper:
 
 ```
-~$ hippodoc project_link
+hippodoc URL
 ```
 
-### `check.sh` - Generated for checking formats on all required files
+Or simply create / modify user credentials:
 
 ```
-~$ ./check.sh
+hippoconfig
 ```
 
 ## Repository Contents :file_folder:
 
-* [hipposcraper.sh](./hipposcraper.sh)
-  * A Bash script for running the entire Hipposcraper at once.
+* [hipposcraper.py](./hipposcraper.py)
+  * Python script that runs the Hipposcraper.
 
 * [hippodir.py](./hippodir.py)
   * Python script that scrapes Holberton intranet webpage to create project 
@@ -181,21 +137,22 @@ directories.
   * Python script that scrapes Holberton intranet webpage to create project 
 `README.md`.
 
-* [credentials.json](./credentials.json)
-  * Stores user Holberton intranet and GitHub profile information.
+* [hippoconfig.py](./hippoconfig.py)
+  * Python script that manages user configuration.
 
-* [scrapers](./scrapers)
+* [scrapers](./hipposcraper/scrapers)
   * Folder of file-creation scrapers.
-    * [base_parse.py](./scrapers/base_parse.py): Python script for parsing project pages.
-    * [sys_scraper.py](./scrapers/sys_scraper.py): Python methods for creating 
+    * [base_parse.py](./hipposcraper/scrapers/base_parse.py): Python script for parsing project pages.
+    * [sys_scraper.py](./hipposcraper/scrapers/sys_scraper.py): Python methods for creating 
 Bash task files for system engineering projects.
-    * [low_scraper.py](./scrapers/low_scraper.py): Python methods for creating 
+    * [low_scraper.py](./hipposcraper/scrapers/low_scraper.py): Python methods for creating 
 `_putchar.c`, task files, and header file for low-level programming projects.
-    * [high_scraper.py](./scrapers/high_scraper.py): Python methods for creating 
+    * [high_scraper.py](./hipposcraper/scrapers/high_scraper.py): Python methods for creating 
 Python task files for higher-level programming projects.
-    * [test_file_scraper.py](./scrapers/test_file_scraper.py): Python methods for creating 
+    * [test_file_scraper.py](./hipposcraper/scrapers/test_file_scraper.py): Python methods for creating 
 test files for all project types.
-* [setup.sh](./setup.sh): Sets up all variables and aliases with this script.
+* [setup.py](./setup.py): `setuptools` installation script.
+* [install.py](./install.py): Alternative installation script.
 * [autover.sh](./autover.sh): Development tool for changing all version strings.
     
 ---
