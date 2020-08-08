@@ -3,11 +3,11 @@
 
 ## Create Directory Skeletons and READMEs for Holberton School Projects
 
-This repo is now being maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
+This repo is currently maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
 Feel welcome to get in touch with any questions, comments, contributions, or
-criticisms. If you would like to contribute, you should totally do that! Take a
-look at the source code and send me a message (either on Slack or by email) or
-submit a pull request and I'll check it out. I assure you there is much to do.
+criticisms. If you would like to contribute, you should totally do that! Check
+out the source code and send me a message (either on Slack or by email), or
+make some changes and submit a pull request.
 
 <p align="center">
   <img src="http://www.holbertonschool.com/holberton-logo.png">
@@ -31,10 +31,7 @@ the corresponding directory and files. The Hipposcraper supports the following:
 
 ### Prerequisites
 
-The Hipposcraper depends on the Python packages `requests` and `beautifulsoup4`. 
-The simplest way to install these packages is through `pip`.
-If `pip` is not installed, you may install it using whichever of the
-following commands applies to you.
+* First, install `pip`:
 
 #### On Arch Linux:
 
@@ -54,53 +51,38 @@ sudo apt install python3-pip
 sudo dnf install python3
 ```
 
-Once `pip` available, install `requests` and `beautifulsoup4` as follows:
+* Next, ensure `setuptools` is up-to-date:
 
 ```
-pip install --user -r requirements.txt
+python3 -m pip install --user -U setuptools
 ```
 
 ### Installation
 
-Clone the repository:
+* Clone the repository:
 
 ```
 git clone https://github.com/patrickdeyoreo/hipposcraper
 ```
 
-Enter the project directory:
+* Enter the repository:
 
 ```
 cd hipposcraper
 ```
 
-#### To install using `setuptools`:
-
-Ensure you have the latest version of `setuptools`:
-
-```
-pip install -U --user setuptools
-```
-
-Run the setup script:
+* Run the setup script:
 
 ```
 python3 setup.py install --user
-```
-
-#### To install using a homemade installation script:
-
-Run the installation script:
-
-```
-python3 install.py
 ```
 
 ---
 
 ## Usage :computer:
 
-Run the Hipposcraper with the following command, where `URL` is the URL of a Holberton project:
+Toe run the Hipposcraper, use following command, where `URL` is the URL of a
+project on the Holberton intranet:
 
 ```
 hipposcraper URL
@@ -118,11 +100,13 @@ Or run only the `README.md` scraper:
 hippodoc URL
 ```
 
-Or simply create / modify user credentials:
+Or simply configure user credentials:
 
 ```
 hippoconfig
 ```
+
+---
 
 ## Repository Contents :file_folder:
 
