@@ -31,7 +31,7 @@ the corresponding directory and files. The Hipposcraper supports the following:
 
 ### Prerequisites
 
-* First, install `pip`:
+First, install `pip`:
 
 #### On Arch Linux:
 
@@ -51,7 +51,7 @@ sudo apt install python3-pip
 sudo dnf install python3
 ```
 
-* Next, ensure `setuptools` is up-to-date:
+Next, ensure `setuptools` is up-to-date:
 
 ```
 python3 -m pip install --user -U setuptools
@@ -59,19 +59,19 @@ python3 -m pip install --user -U setuptools
 
 ### Installation
 
-* Clone the repository:
+Clone the repository:
 
 ```
 git clone https://github.com/patrickdeyoreo/hipposcraper
 ```
 
-* Enter the repository:
+Enter the repository:
 
 ```
 cd hipposcraper
 ```
 
-* Run the setup script:
+Run the setup script:
 
 ```
 python3 setup.py install --user
