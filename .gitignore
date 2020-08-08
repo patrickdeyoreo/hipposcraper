@@ -5,10 +5,10 @@
 !*/
 
 # whitelist files as needed
-!README.*
-!LICENSE
-!AUTHORS
 !.gitignore
+!README*
+!AUTHORS
+!LICENSE
 !/hippoconfig.py
 !/hippodir.py
 !/hippodoc.py
@@ -17,7 +17,7 @@
 !/install.py
 !/requirements.txt
 !/setup.py
-!/setup.sh
+!/setup.cfg
 !/tests/**
 
 # blacklist remaining "lint"
