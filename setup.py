@@ -5,13 +5,16 @@ import setuptools
 
 here = pathlib.Path(__file__).parent.resolve()
 
+with open(here / 'README.md') as istream:
+    long_description = istream.read()
+
 setuptools.setup(
     name="hipposcraper",
     version="2.0.2",
     author="Patrick DeYoreo",
     author_email="pdeyoreo@gmail.com",
     description="Create Holberton School project skeletons and documentation.",
-    long_description=here.joinpath('README.md').read_text(encoding='utf-8'),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="github.com/patrickdeyoreo/hipposcraper",
     classifiers=[
