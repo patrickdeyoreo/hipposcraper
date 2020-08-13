@@ -5,7 +5,7 @@ import setuptools
 
 here = pathlib.Path(__file__).parent.resolve()
 
-with open(here / 'README.md') as istream:
+with open(str(here / 'README.md')) as istream:
     long_description = istream.read()
 
 setuptools.setup(
