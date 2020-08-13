@@ -37,12 +37,18 @@ def create_dir(url, credentials=None):
     project_type = project_data.project_type_check()
 
     # Creating scraping objects
-    if "high" in project_type or "interview" in project_type:
+    if "high" in project_type:
         scraper = scrapers.HighScraper(project_data.soup)
-    elif "low" in project_type or "linux" in project_type:
+    elif "low" in project_type:
         scraper = scrapers.LowScraper(project_data.soup)
     elif "devops" in project_type:
         scraper = scrapers.SysScraper(project_data.soup)
+    elif "linux" in project_type:
+        scraper = scrapers.LowScraper(project_data.soup)
+    elif "webstack" in project_type:
+        scraper = scrapers.HighScraper(project_data.soup)
+    elif "interview" in project_type:
+        scraper = scrapers.HighScraper(project_data.soup)
     else:
         raise ValueError('Failed to determine project type.')
 
