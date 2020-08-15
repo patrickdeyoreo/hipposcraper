@@ -31,13 +31,13 @@ def parse_kwargs():
     """Parse arguments passed by caller."""
     parser = argparse.ArgumentParser()
     parser.add_argument('-a', '--author-name', dest='author',
-                        default=None, help='name of author')
+                        help='name of author')
     parser.add_argument('-g', '--github-user', dest='github_username',
-                        default=None, help='github username')
+                        help='github username')
     parser.add_argument('-u', '--holberton-user', dest='holberton_username',
-                        default=None, help='holberton intranet username')
+                        help='holberton intranet username')
     parser.add_argument('-p', '--holberton-pass', dest='holberton_password',
-                        default=None, help='holberton intranet password')
+                        help='holberton intranet password')
     args = parser.parse_args()
     return {key: arg for key, arg in vars(args).items() if arg is not None}
 
@@ -46,8 +46,9 @@ def create_config(**kwgs):
     """Create and update hipposcraper config."""
     user_data = Credentials(load=False)
     try:
+        config_path = user_data.load()
         print("Loaded config from {}".format(
-            user_data.load().replace(os.path.expanduser('~'), '~', 1)
+            config_path.replace(os.path.expanduser('~'), '~', 1)
         ))
         print('Configuration:')
         pprint.pprint(user_data)

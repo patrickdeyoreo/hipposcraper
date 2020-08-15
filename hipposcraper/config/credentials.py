@@ -16,36 +16,21 @@ class Credentials(dict):
     __iteminfo = {
         'author': 'Name of author',
         'github_username': 'GitHub username',
-        'holberton_username': 'Holberton username',
+        'holberton_username': 'Holberton login',
         'holberton_password': 'Holberton password',
     }
 
-    def __init__(self, load=False, ignore_errors=(), **kwgs):
+    def __init__(self, load=False, ignore_errors=()):
         """Initialize a credentials dictionary."""
-        ignore_errors = tuple(ignore_errors)
+        super().__init__((key, None) for key in self.__iteminfo)
         if load:
-            try:
-                with open(self.path, 'r') as istream:
-                    kwgs.update({
-                        key: value for key, value in json.load(istream).items()
-                        if key not in kwgs
-                    })
-            except ignore_errors:
-                pass
-        super().__init__({key: kwgs.get(key) for key in self.__iteminfo})
+            self.load(ignore_errors=ignore_errors)
 
     def __setitem__(self, key, value):
-        """Only set the values of recognized items."""
+        """Only set the values of known keys."""
         if key not in self.__iteminfo:
             raise KeyError('Bad credential key: {}'.format(key))
         super().__setitem__(key, value)
-
-    def __delitem__(self, key):
-        """Reset values rather than removing items."""
-        if key in self.__iteminfo:
-            super().__setitem__(key, None)
-        else:
-            super().__delitem__(key)
 
     @property
     def basename(self):
@@ -68,19 +53,6 @@ class Credentials(dict):
             raise KeyError('Bad credential key: {}'.format(key))
         return self.__iteminfo[key]
 
-    def load(self, ignore_errors=()):
-        """Load credentials and return the path."""
-        ignore_errors = tuple(ignore_errors)
-        try:
-            with open(self.path, 'r') as istream:
-                self.update({
-                    key: value for key, value in json.load(istream).items()
-                    if key in self.__iteminfo
-                })
-        except ignore_errors:
-            pass
-        return self.path
-
     def save(self, ignore_errors=()):
         """Save credentials and return the path."""
         ignore_errors = tuple(ignore_errors)
@@ -96,8 +68,17 @@ class Credentials(dict):
             pass
         try:
             with open(self.path, 'w') as ostream:
-                json.dump(self, ostream)
-                print(file=ostream)
+                print(json.dumps(self), file=ostream)
+        except ignore_errors:
+            pass
+        return self.path
+
+    def load(self, ignore_errors=()):
+        """Load credentials and return the path."""
+        ignore_errors = tuple(ignore_errors)
+        try:
+            with open(self.path, 'r') as istream:
+                self.update(json.load(istream))
         except ignore_errors:
             pass
         return self.path
