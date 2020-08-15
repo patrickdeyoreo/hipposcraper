@@ -64,16 +64,10 @@ Clone the repository:
 git clone https://github.com/patrickdeyoreo/hipposcraper
 ```
 
-Enter the repository:
+Run the installation script:
 
 ```
-cd hipposcraper
-```
-
-Run the setup script:
-
-```
-python3 setup.py install --user
+hipposcraper/install.py
 ```
 
 ---
