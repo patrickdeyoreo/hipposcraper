@@ -34,7 +34,7 @@ class ColorFormatter(logging.Formatter):
         """Iniitalize a colored formatter."""
         super().__init__(*args, **kwgs)
         if colors is None:
-            self.colors = dict(ERROR=1, INFO=2, WARNING=3, DEBUG=4, CRITICAL=5)
+            self.colors = dict(ERROR=1, WARNING=3, DEBUG=4, CRITICAL=5)
         else:
             self.colors = dict(colors)
 
