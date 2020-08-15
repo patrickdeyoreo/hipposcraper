@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-Install hipposcraper.
-
-Usage:
-    install.py
+Install the Hipposcraper.
 """
+# pylint: disable=invalid-name
 
 import atexit
+import importlib
 import logging
 import os
 import pathlib
@@ -16,48 +15,54 @@ import site
 import subprocess
 import sys
 
-THISDIR = pathlib.Path(__file__).parent.resolve()
 
-SCRIPTS = {path.stem: path for path in THISDIR.glob('hippo*.py')}
+HERE = pathlib.Path(__file__).parent.resolve()
 
-try:
-    import hipposcraper
-except ImportError:
-    try:
-        subprocess.run([
-            sys.executable, '-m', 'pip', 'install', '--user', '-r',
-            str(THISDIR / 'requirements.txt'),
-        ], check=True)
-    except subprocess.CalledProcessError as err:
-        sys.exit(err.returncode)
-    import hipposcraper
+PACKAGE = 'hipposcraper'
 
-PKGNAME = hipposcraper.__package__
+SCRIPTS = list(HERE.glob('hippo*.py'))
 
-PKGSRC = pathlib.Path(hipposcraper.__file__).absolute().parent
+PACKAGE_REQUIRE_FILE = HERE / 'requirements.txt'
 
-LOGGER = logging.getLogger(PKGNAME)
-LOGGER.setLevel('DEBUG' if 'DEBUG' in os.environ else 'INFO')
-
-logging.basicConfig(format='%(filename)s: %(message)s')
-
-signal.signal(signal.SIGINT, lambda *_: sys.exit(128 + signal.SIGINT))
+VERSION_REQUIRE = '3.5'
 
 
-class InstallationDirectories:
+class ColorFormatter(logging.Formatter):
+    """Color messages based on level name."""
+
+    def __init__(self, *args, colors=None, **kwgs):
+        """Iniitalize a colored formatter."""
+        super().__init__(*args, **kwgs)
+        if colors is None:
+            self.colors = dict(ERROR=1, INFO=2, WARNING=3, DEBUG=4, CRITICAL=5)
+        else:
+            self.colors = dict(colors)
+
+    def format(self, record):
+        """Format and color a log message."""
+        n = self.colors.get(record.levelname)
+        if n is None:
+            seq = '{:c}[39m'.format(0x1b)
+        else:
+            seq = '{:c}[38;5;{:d}m'.format(0x1b, n)
+        return ''.join((seq, super().format(record), '{:c}[0m'.format(0x1b)))
+
+
+class InstallationDirs:
     """Prepare installation directories."""
 
-    def __init__(self, package=PKGNAME):
+    def __init__(self, package, make_directories=False):
         """Initialize an installation directory configuration."""
-        LOGGER.info('Configuring installation directories for %s', package)
         self.__package = package
-        self.__directories = {self.bin, self.config, self.site}
+        self.__directories = {self.bin, self.site, self.config}
         self.__created = set()
+        if make_directories is True:
+            self.make_directories()
 
     @property
-    def directories(self):
-        """Get user bin directory"""
-        return self.__directories.copy()
+    def home(self):
+        """Get the path of the user home directory"""
+        return pathlib.Path.home()
 
     @property
     def bin(self):
@@ -67,19 +72,22 @@ class InstallationDirectories:
         return self.home / '.local' / 'bin'
 
     @property
-    def config(self):
-        """Get the path of the user config directory"""
-        return pathlib.Path(hipposcraper.CONFIG_HOME)
-
-    @property
-    def home(self):
-        """Get the path of the user home directory"""
-        return pathlib.Path.home()
-
-    @property
     def site(self):
         """Get the path of the user site direcotry"""
         return pathlib.Path(site.getusersitepackages())
+
+    @property
+    def config(self):
+        """Get the path of the user config directory"""
+        return pathlib.Path(os.getenv(
+            'XDG_CONFIG_HOME',
+            os.path.join(os.path.expanduser('~'), '.config')
+        )).absolute() / self.__package
+
+    @property
+    def directories(self):
+        """Get user bin directory"""
+        return self.__directories.copy()
 
     def register_directory(self, value):
         """Add an installation directory"""
@@ -105,64 +113,113 @@ class InstallationDirectories:
 
     def make_directories(self):
         """Create the installation directories"""
-        LOGGER.debug('Enabling directory removal upon exit...')
         atexit.register(self.unmake_directories)
-        LOGGER.info('Creating directories...')
+        logging.info('Creating installation directories...')
         for path in self.directories:
             try:
                 path.mkdir(parents=True)
                 self.__created.add(path)
-                LOGGER.info('Created %s', path)
+                logging.info('Created %s', path)
             except FileExistsError:
-                LOGGER.info('%s already exists.', path)
-        LOGGER.info('Directory creation complete.')
+                logging.debug('%s already exists.', path)
+        logging.debug('Directory creation complete.')
 
     def unmake_directories(self):
         """Remove directories created by the bound instance"""
-        LOGGER.warning('Removing directories...')
+        logging.warning('Removing newly-created installation directories...')
         for path in self.__created:
             try:
-                shutil.rmtree(path)
-                LOGGER.warning('Removed %s', path)
+                shutil.rmtree(str(path))
+                logging.warning('Removed %s', path)
             except FileNotFoundError:
-                LOGGER.warning('%s not found... where did it go?', path)
-        LOGGER.warning('Directory removal complete.')
+                logging.warning('%s not found... where did it go?', path)
+        logging.warning('Directory removal complete.')
 
     def commit_directories(self):
         """Commit directory changes such that they will not be undone."""
-        LOGGER.debug('Disabling directory removal upon exit...')
         atexit.unregister(self.unmake_directories)
         self.__created.clear()
-        LOGGER.debug('Directory changes committed.')
+        logging.debug('Directory changes committed.')
+
+
+def install_requirements(stdout=None, stderr=None):
+    """Installed required packages."""
+    filename = str(PACKAGE_REQUIRE_FILE)
+    argv = [sys.executable, '-m', 'pip', 'install', '--user', '-r', filename]
+    return subprocess.run(argv, stdout=stdout, stderr=stderr, check=False)
+
+
+def install_scripts(bin_path):
+    """Install executable scripts."""
+    for src in SCRIPTS:
+        dest = bin_path / src.stem
+        logging.info('Installing %s executable at %s ...', src.stem, dest)
+        shutil.copyfile(str(src), str(dest))
+        mode = dest.stat().st_mode & 0o7777 | 0o100
+        logging.debug('Setting permissions to %03o on %s ...', mode, dest)
+        logging.debug('%s installed.', src.stem)
+        dest.chmod(mode)
+
+
+def python_at_least_version(min_version):
+    """Check the Python interpreter version."""
+    min_version_info = map(int, min_version.split('.'))
+    return all(m <= n for m, n in zip(min_version_info, sys.version_info))
+
+
+def configure_logging(level='INFO', fmt='%(message)s', stream=None):
+    """Add a stream handler to a logger."""
+    handler = logging.StreamHandler(stream=stream)
+    handler.setFormatter(ColorFormatter(fmt=fmt))
+    handler.setLevel(level)
+    logging.basicConfig(level=level, format=fmt, handlers=[handler])
+
+
+def sigint_handler(_, __):
+    """Exit upon receiving SIGINT."""
+    sys.exit(128 + signal.SIGINT)
 
 
 def main():
-    """Install hipposcraper."""
-    dirs = InstallationDirectories(PKGNAME)
-    dirs.make_directories()
-    LOGGER.debug('Removing Python bytecode from source tree...')
-    for path in PKGSRC.rglob('__pycache__'):
-        shutil.rmtree(path)
-    LOGGER.debug('Python bytecode removed.')
-    dest = dirs.site / PKGNAME
+    """Install the Hipposcraper."""
+    signal.signal(signal.SIGINT, sigint_handler)
+    configure_logging(level='DEBUG' if 'DEBUG' in os.environ else 'INFO')
+    logging.info("Checking Python version...")
+    if not python_at_least_version(VERSION_REQUIRE):
+        logging.error("Python does not meet installation requirements.")
+        logging.warning("Requires at least version %s (current version is %s)",
+                        VERSION_REQUIRE, sys.version[:sys.version.find(' ')])
+        return 1
+    logging.info("Installing required packages...")
+    process = install_requirements(
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    if process.returncode != 0:
+        logging.error(process.stderr.decode())
+        return process.returncode
+    logging.info('Importing %s module...', PACKAGE)
+    pkg = importlib.import_module(PACKAGE)
+    name = pkg.__package__
+    src = pathlib.Path(pkg.__file__).absolute().parent
+    logging.debug('Package source tree: %s', src)
+    dirs = InstallationDirs(name, make_directories=True)
+    logging.debug('Removing bytecode from source tree...')
+    for path in src.rglob('__pycache__'):
+        shutil.rmtree(str(path))
+    logging.debug('Bytecode removed.')
+    dest = dirs.site / name
     if dest.exists():
-        LOGGER.info('Removing existing installation...')
-        shutil.rmtree(dest)
-        LOGGER.debug('Installation removed.',)
-    LOGGER.info('Installing %s package at %s...', PKGNAME, str(dest))
-    shutil.copytree(PKGSRC, dest)
-    LOGGER.debug('Package installed.',)
-    for name, src in SCRIPTS.items():
-        dest = dirs.bin / name
-        LOGGER.info('Installing %s executable at %s...', name, str(dest))
-        shutil.copyfile(src, dest)
-        LOGGER.debug('%s installed.', name)
-        mode = dest.stat().st_mode & 0o7777 | 0o100
-        LOGGER.debug('Changing file mode to %03o on %s...', mode, str(dest))
-        dest.chmod(mode)
-    LOGGER.debug('Committing directory changes...')
+        logging.debug('Found existing installation.')
+        logging.debug('Removing...')
+        shutil.rmtree(str(dest))
+        logging.debug('Installation removed.',)
+    logging.info('Installing %s package under %s ...', name, dest)
+    shutil.copytree(str(src), str(dest))
+    logging.debug('Package installed.',)
+    install_scripts(dirs.bin)
+    logging.debug('Committing directory changes...')
     dirs.commit_directories()
-    LOGGER.info('Installation complete.')
+    logging.info('Installation complete.')
+    return 0
 
 
 if __name__ == '__main__':
