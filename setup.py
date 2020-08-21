@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """setuptools build script"""
-import pathlib
+import os
 import setuptools
 
-THISDIR = os.path.abspath(os.path.dirname(__file__).parent)
+THISDIR = os.path.abspath(os.path.dirname(__file__))
 
 try:
     with open(os.path.join(THISDIR, "README.md")) as istream:
