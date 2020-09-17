@@ -34,7 +34,7 @@ setuptools.setup(
             "hipposcraper=hipposcraper:main",
             "hippodoc=hipposcraper:hippodoc",
             "hippodir=hipposcraper:hippodir",
-            "hippocfg=hipposcraper:hippocfg",
+            "hippoconfig=hipposcraper:hippoconfig",
         ],
     },
     install_requires=[
