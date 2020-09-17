@@ -41,5 +41,5 @@ setuptools.setup(
         "beautifulsoup4 >=4.8.2",
         "requests >=2.24",
     ],
-    python_requires=">=3.5",
+    python_requires=">=3.4",
 )
