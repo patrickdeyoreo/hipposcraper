@@ -142,11 +142,11 @@ class InstallationDirs:
         logging.debug('Directory changes committed.')
 
 
-def install_requirements(stdout=None, stderr=None):
+def install_requirements(stderr=None):
     """Installed required packages."""
     filename = str(PACKAGE_REQUIRE_FILE)
     argv = [sys.executable, '-m', 'pip', 'install', '--user', '-r', filename]
-    return subprocess.run(argv, stdout=stdout, stderr=stderr, check=False)
+    return subprocess.check_output(argv, stderr=stderr)
 
 
 def install_scripts(bin_path):
@@ -191,11 +191,11 @@ def main():
                         VERSION_REQUIRE, sys.version[:sys.version.find(' ')])
         return 1
     logging.info("Installing required packages...")
-    process = install_requirements(
-        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
-    if process.returncode != 0:
-        logging.error(process.stderr.decode())
-        return process.returncode
+    try:
+        check_output = install_requirements(stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as exc:
+        logging.error(check_output.decode())
+        return exc.returncode
     logging.info('Importing %s module...', PACKAGE)
     pkg = importlib.import_module(PACKAGE)
     name = pkg.__package__
