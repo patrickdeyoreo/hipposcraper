@@ -24,7 +24,7 @@ SCRIPTS = list(HERE.glob('hippo*.py'))
 
 PACKAGE_REQUIRE_FILE = HERE / 'requirements.txt'
 
-VERSION_REQUIRE = '3.5'
+VERSION_REQUIRE = '3.4'
 
 
 class ColorFormatter(logging.Formatter):
