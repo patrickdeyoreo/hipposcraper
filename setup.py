@@ -31,7 +31,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "hipposcrape=hipposcraper:hipposcrape",
+            "hipposcraper=hipposcraper:hipposcraper",
             "hippodoc=hipposcraper:hippodoc",
             "hippodir=hipposcraper:hippodir",
             "hippoconfig=hipposcraper:hippoconfig",

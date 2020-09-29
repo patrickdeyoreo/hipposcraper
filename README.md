@@ -78,7 +78,7 @@ To run the Hipposcraper, use following command, where `URL` is the URL of a
 project on the Holberton intranet:
 
 ```
-hipposcrape URL
+hipposcraper URL
 ```
 
 Alternatively, run only the project scraper:
@@ -103,7 +103,7 @@ hippoconfig
 
 ## Repository Contents :file\_folder:
 
-* [hipposcrape.py](./hipposcrape.py) -
+* [hipposcraper.py](./hipposcraper.py) -
   run the hipposcraper
 
 * [hippodir.py](./hippodir.py) -

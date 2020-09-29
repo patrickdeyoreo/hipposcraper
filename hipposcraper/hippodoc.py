@@ -22,14 +22,14 @@ def parse_args():
 
 def create_doc(url, credentials=None):
     """Create a README for a project given its URL."""
-    print("Creating README.md:")
+    print("Creating README:")
     parse_data = scrapers.BaseParse(url, credentials=credentials)
 
-    sys.stdout.write("  -> Scraping information... ")
+    print("  -> Scraping project information... ")
     # Creating scraping object
     r_scraper = scrapers.ReadScraper(parse_data.soup)
 
-    print("done")
+    print("     Done.")
 
     # Writing to README.md with scraped data
     r_scraper.open_readme()
@@ -42,7 +42,7 @@ def create_doc(url, credentials=None):
     user = parse_data.user_data['github_username']
     r_scraper.write_footer(author, user, 'github.com/{}'.format(user))
 
-    print("README.md all set!")
+    print("Created README.")
 
     return r_scraper.readme
 

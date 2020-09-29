@@ -4,6 +4,20 @@ import json
 import re
 import sys
 
+_PUTCHAR = """#include <unistd.h>
+
+/**
+ * _putchar - write a character to stdout
+ * @c: the character to write
+ *
+ * Return: On error, -1 is returned, and errno is set appropriately.
+ * Otherwise, 1 is returned.
+ */
+int _putchar(char c)
+{
+\treturn (write(STDOUT_FILENO, &c, 1));
+}"""
+
 
 class LowScraper:
     """LowParse class
@@ -27,40 +41,25 @@ class LowScraper:
         self.file_names = self.find_files()
 
     def find_putchar(self):
-        """Method to scrape holberton's `_putchar`
-
-        Used for creating holberton's `_putchar` file if required
-        """
-        sys.stdout.write("  -> Checking for _putchar... ")
-        search_putchar = self.soup.find(string=re.compile("You are allowed to use"))
+        """Method to check for holberton's `_putchar`"""
+        match = self.soup.find(string=re.compile("You are allowed to use"))
         try:
-            if len(search_putchar) == 23:
-                return search_putchar.next_sibling.text
+            if len(match) == 23:
+                return match.next_sibling.text
         except TypeError:
             return None
 
     def write_putchar(self):
-        """Method to write/create holberton's `_putchar` if required"""
+        """Method to create Holberton's `_putchar` if required"""
         if self.putchar_check == "_putchar":
-            w_putchar = open("_putchar.c", "w+")
-            w_putchar.write("#include <unistd.h>\n")
-            w_putchar.write("\n")
-            w_putchar.write("/**\n")
-            w_putchar.write(" * _putchar - writes the character c to stdout\n")
-            w_putchar.write(" * @c: The character to print\n")
-            w_putchar.write(" *\n")
-            w_putchar.write(" * Return: On success 1.\n")
-            w_putchar.write(" * On error, -1 is returned, and errno")
-            w_putchar.write(" is set appropriately.\n")
-            w_putchar.write(" */\n")
-            w_putchar.write("int _putchar(char c)\n")
-            w_putchar.write("{\n")
-            w_putchar.write("       return (write(1, &c, 1));\n")
-            w_putchar.write("}")
-            w_putchar.close()
-            print("created")
-        else:
-            print("not created")
+            print("  -> Creating _putchar.c ...")
+            try:
+                with open("_putchar.c", "w") as ostream:
+                    print(_PUTCHAR, file=ostream)
+            except OSError:
+                print("     [ERROR] Failed to write _putchar")
+            else:
+                print("     Done.")
 
     def find_prototypes(self):
         """Method to scrape for C prototypes"""
@@ -88,7 +87,7 @@ class LowScraper:
             include_guard = include_guard.replace('.', '_', 1)
             include_guard = include_guard.upper()
 
-            sys.stdout.write("  -> Creating header file... ")
+            print("  -> Creating header file...")
             try:
                 w_header = open(self.header_name, "w+")
                 w_header.write('#ifndef %s\n' % include_guard)
@@ -114,9 +113,9 @@ class LowScraper:
                 w_header.write("\n")
                 w_header.write('#endif /* %s */' % include_guard)
                 w_header.close()
-                print("done")
+                print("     Done.")
             except AttributeError:
-                print("[ERROR] Failed to create header file")
+                print("     [ERROR] Failed to create header file.")
         else:
             pass
 
@@ -132,7 +131,7 @@ class LowScraper:
         self.write_putchar()
         self.write_header()
         i = 0
-        sys.stdout.write("  -> Creating task files... ")
+        print("  -> Creating task files...")
         for item in self.file_names:
             file_text = item.next_sibling.text
             # Breaks incase more function names over file names
@@ -171,11 +170,11 @@ class LowScraper:
                     w_file_name.close()
                 i += 1
             except (AttributeError, IndexError):
-                sys.stdout.write("[ERROR] Failed to create ")
-                sys.stdout.write("task file %s\n" % file_text)
-                sys.stdout.write("                        ... ")
+                print("     [ERROR] Failed to create task file {}".format(
+                    file_text
+                ))
                 continue
-        print("done")
+        print("     Done.")
 
     def write_checker(self):
         with open("check.sh", "w") as f:

@@ -5,7 +5,7 @@ Create Holberton School project skeletons and documentation.
 import os
 import logging
 
-from . hipposcrape import hipposcrape
+from . hipposcraper import hipposcraper
 from . hippodir import hippodir
 from . hippodoc import hippodoc
 from . hippoconfig import hippoconfig

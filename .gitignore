@@ -12,7 +12,7 @@
 !/hippoconfig.py
 !/hippodir.py
 !/hippodoc.py
-!/hipposcrape.py
+!/hipposcraper.py
 !/hipposcraper/**
 !/install.py
 !/requirements.txt

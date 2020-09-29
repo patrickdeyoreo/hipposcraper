@@ -58,7 +58,7 @@ class HighScraper:
         one_dir_check = 0
         folder_name = None
 
-        sys.stdout.write("  -> Creating task files... ")
+        print("  -> Creating task files...")
         for item in self.file_names:
             text_file = item.next_sibling.text
             try:
@@ -103,13 +103,14 @@ class HighScraper:
                         pass
                     w_file_name.close()
             except AttributeError:
-                sys.stdout.write("[ERROR] Failed to create ")
-                sys.stdout.write("task file %s\n" % text_file)
-                sys.stdout.write("                        ... ")
+                print("     [ERROR] Failed to create task file {}".format(
+                    text_file
+                ))
                 continue
             except IOError:
-                sys.stdout.write("[ERROR] Failed to make file, passing\n")
-                sys.stdout.write("                        ... ")
+                print("     [ERROR] Failed to create task file {}".format(
+                    text_file
+                ))
                 pass
             except IndexError:
                 pass
@@ -124,7 +125,7 @@ class HighScraper:
                 dir_file = open(item, "w+")
                 dir_file.close()
             os.chdir("..")
-        print("done")
+        print("     Done.")
 
     def write_checker(self):
         with open("check.sh", "w") as f:

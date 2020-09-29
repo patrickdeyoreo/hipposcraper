@@ -23,31 +23,38 @@ def parse_args():
 
 def set_permissions():
     """Set file permissions."""
-    sys.stdout.write("  -> Setting permissions... ")
+    print("  -> Setting permissions...")
     for path in pathlib.Path('.').glob('*'):
         path.chmod(path.stat().st_mode & 0o7777 | 0o100)
+    print("     Done.")
 
 
 def create_dir(url, credentials=None):
     """Create a directory for a project given its URL."""
 
-    print("Creating project:")
+    print("Creating project skeleton:")
     # Acquiring and parsing project data
     project_data = scrapers.BaseParse(url, credentials=credentials)
     project_type = project_data.project_type_check()
 
     # Creating scraping objects
-    if "high" in project_type:
-        scraper = scrapers.HighScraper(project_data.soup)
-    elif "low" in project_type:
+    if project_type.endswith("low_level_programming"):
         scraper = scrapers.LowScraper(project_data.soup)
-    elif "devops" in project_type:
+    elif project_type.endswith("higher_level_programming"):
+        scraper = scrapers.HighScraper(project_data.soup)
+    elif project_type.endswith("system_engineering-devops"):
         scraper = scrapers.SysScraper(project_data.soup)
-    elif "linux" in project_type:
+    elif project_type.endswith("system_linux"):
         scraper = scrapers.LowScraper(project_data.soup)
-    elif "webstack" in project_type:
+    elif project_type.endswith("system_algorithms"):
+        scraper = scrapers.LowScraper(project_data.soup)
+    elif project_type.endswith("machine_learning"):
         scraper = scrapers.HighScraper(project_data.soup)
-    elif "interview" in project_type:
+    elif project_type.endswith("web_front_end"):
+        scraper = scrapers.HighScraper(project_data.soup)
+    elif project_type.endswith("webstack"):
+        scraper = scrapers.HighScraper(project_data.soup)
+    elif project_type.endswith("interview"):
         scraper = scrapers.HighScraper(project_data.soup)
     else:
         raise ValueError('Failed to determine project type.')
@@ -59,7 +66,7 @@ def create_dir(url, credentials=None):
     # Creating test (main) files
     scrapers.TestFileScraper(project_data.soup).write_test_files()
 
-    print('Created project directory.')
+    print('Created project skeleton.')
     return project_data.dir_name
 
 

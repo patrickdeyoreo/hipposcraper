@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-hipposcrape entry point
-usage: hipposcrape.py URL ...
+hipposcraper entry point
+usage: hipposcraper.py URL ...
 """
 import argparse
 import json
@@ -20,7 +20,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def hipposcrape():
+def hipposcraper():
     """Create task files and generate a README for each project URL."""
     args = parse_args()
     try:
@@ -41,4 +41,4 @@ def hipposcrape():
 
 
 if __name__ == "__main__":
-    sys.exit(hipposcrape())
+    sys.exit(hipposcraper())
