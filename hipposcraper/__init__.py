@@ -11,7 +11,7 @@ from . hippodoc import hippodoc
 from . hippoconfig import hippoconfig
 
 __license__ = 'GPL3'
-__version__ =  '2.0.3'
+__version__ =  '2.1.0'
 
 LOGGER = logging.getLogger(__name__)
 
