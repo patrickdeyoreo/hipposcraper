@@ -138,16 +138,6 @@ hippoconfig
 
 ---
 
-## Contributing
-
-This repo is currently maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
-Feel welcome to get in touch with any questions, comments, contributions, or
-criticisms. If you would like to contribute, you should totally do that! Check
-out the source code and send me a message (either on Slack or by email), or
-make some changes and submit a pull request.
-
----
-
 ## Example of the C scraper
 
 ![demo0](https://i.imgur.com/oB08uzF.png)
@@ -159,6 +149,16 @@ make some changes and submit a pull request.
 ## Example of `check.sh`
 
 ![demo2](https://i.imgur.com/oQqTLWXh.jpg)
+
+---
+
+## Contributing
+
+This repo is currently maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
+Feel welcome to get in touch with any questions, comments, contributions, or
+criticisms. If you would like to contribute, you should totally do that! Check
+out the source code and send me a message (either on Slack or by email), or
+make some changes and submit a pull request.
 
 ---
 
