@@ -21,7 +21,7 @@ class TestFileScraper:
         return self.soup.select("pre")
 
     def write_test_files(self):
-        sys.stdout.write("  -> Creating test files... ")
+        print("  -> Creating test files...")
         for item in self.pre:
             find_test = item.text.find("cat")
             find_c = item.text.find("main.c")
@@ -71,13 +71,11 @@ class TestFileScraper:
                             break
                         if i == "\n":
                             newlines += 1
-                    sys.stdout.write("[ERROR] Could not create ")
-                    sys.stdout.write("test file %s\n" % name)
-                    sys.stdout.write("                        ... ")
+                    print("     [ERROR] Failed to create file {}".format(name))
                     continue
                 except IOError:
-                    sys.stdout.write("\n     [ERROR] Could not create a specific test file.\n")
+                    print("     [ERROR] Failed to create file {}".format(name))
                     continue
             else:
                 pass
-        print("done")
+        print("     Done.")

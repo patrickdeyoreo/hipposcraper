@@ -79,14 +79,14 @@ class BaseParse(object):
                 ).get('value'),
             }
             try:
-                sys.stdout.write("  -> Logging in... ")
+                print("  -> Logging in...")
                 session.post(auth_url, data=credentials)
                 resp = session.get(self.hbtn_link)
                 soup = BeautifulSoup(resp.content, features='html.parser')
             except AttributeError:
-                print("[ERROR] Login failed. Check your credentials.")
+                print("     [ERROR] Login failed - check your credentials.")
                 sys.exit()
-        print("done")
+        print("     Done.")
         return soup
 
     def find_directory(self):
@@ -98,14 +98,14 @@ class BaseParse(object):
 
     def create_directory(self):
         """Create appropriate directory trees."""
-        print("  -> Creating directory {}".format(self.dir_name))
+        print("  -> Creating directory {} ...".format(self.dir_name))
         try:
             os.makedirs(self.dir_name, mode=0o755, exist_ok=False)
             os.chdir(self.dir_name)
-            print("done")
+            print("     Done.")
         except OSError:
-            print("[ERROR] Failed to create directory. Does it already exist?")
-            raise
+            print("     [ERROR] Failed to create directory.")
+            sys.exit()
 
     def project_type_check(self):
         """Scrape project types."""

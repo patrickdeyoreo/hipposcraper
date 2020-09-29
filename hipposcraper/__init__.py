@@ -5,13 +5,13 @@ Create Holberton School project skeletons and documentation.
 import os
 import logging
 
-from . hippoconfig import hippoconfig
+from . hipposcraper import hipposcraper
 from . hippodir import hippodir
 from . hippodoc import hippodoc
-from . main import main
+from . hippoconfig import hippoconfig
 
 __license__ = 'GPL3'
-__version__ =  '2.0.4'
+__version__ =  '2.1.0'
 
 LOGGER = logging.getLogger(__name__)
 

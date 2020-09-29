@@ -12,9 +12,9 @@ make some changes and submit a pull request.
   <img src="http://www.holbertonschool.com/holberton-logo.png">
 </p>
 
-The Hipposcraper automates file template creation for Holberton projects. The 
+The Hipposcraper automates file template creation for Holberton projects. The
 program takes a Holberton School project URL, scrapes the webpage, and creates
-the corresponding directory and files. The Hipposcraper supports the following: 
+the corresponding directory and files. The Hipposcraper supports the following:
 
 | System Engineering    | Low-Level Programming | Higher-Level Programming      |
 | --------------------- | --------------------- | ----------------------------- |
@@ -74,7 +74,7 @@ hipposcraper/install.py
 
 ## Usage :computer:
 
-Toe run the Hipposcraper, use following command, where `URL` is the URL of a
+To run the Hipposcraper, use following command, where `URL` is the URL of a
 project on the Holberton intranet:
 
 ```
@@ -101,37 +101,47 @@ hippoconfig
 
 ---
 
-## Repository Contents :file_folder:
+## Repository Contents :file\_folder:
 
-* [hipposcraper.py](./hipposcraper.py)
-  * Python script that runs the Hipposcraper.
+* [hipposcraper.py](./hipposcraper.py) -
+  run the hipposcraper
 
-* [hippodir.py](./hippodir.py)
-  * Python script that scrapes Holberton intranet webpage to create project 
-directories.
+* [hippodir.py](./hippodir.py) -
+  create project skeleton
 
-* [hippodoc.py](./hippodoc.py)
-  * Python script that scrapes Holberton intranet webpage to create project 
-`README.md`.
+* [hippodoc.py](./hippodoc.py) -
+  create project documentation
 
-* [hippoconfig.py](./hippoconfig.py)
-  * Python script that manages user configuration.
+* [hippoconfig.py](./hippoconfig.py) -
+  manage user configuration
 
-* [scrapers](./hipposcraper/scrapers)
-  * Folder of file-creation scrapers.
-    * [base_parse.py](./hipposcraper/scrapers/base_parse.py): Python script for parsing project pages.
-    * [sys_scraper.py](./hipposcraper/scrapers/sys_scraper.py): Python methods for creating 
-Bash task files for system engineering projects.
-    * [low_scraper.py](./hipposcraper/scrapers/low_scraper.py): Python methods for creating 
-`_putchar.c`, task files, and header file for low-level programming projects.
-    * [high_scraper.py](./hipposcraper/scrapers/high_scraper.py): Python methods for creating 
-Python task files for higher-level programming projects.
-    * [test_file_scraper.py](./hipposcraper/scrapers/test_file_scraper.py): Python methods for creating 
-test files for all project types.
-* [setup.py](./setup.py): `setuptools` installation script.
-* [install.py](./install.py): Alternative installation script.
-* [autover.sh](./autover.sh): Development tool for changing all version strings.
-    
+* [scrapers](./hipposcraper/scrapers) -
+  folder of file-creation scrapers
+
+  - [base\_parse.py](./hipposcraper/scrapers/base_parse.py) -
+    parse project information
+
+  - [sys\_scraper.py](./hipposcraper/scrapers/sys_scraper.py) -
+    create task files for system engineering projects
+
+  - [low\_scraper.py](./hipposcraper/scrapers/low_scraper.py) -
+    create task files and header file for low-level programming projects
+
+  - [high\_scraper.py](./hipposcraper/scrapers/high_scraper.py) -
+    create task files for higher-level programming projects
+
+  - [test\_file\_scraper.py](./hipposcraper/scrapers/test_file_scraper.py) -
+    create test files for all project types
+
+* [setup.py](./setup.py) -
+  `setuptools` installation script
+
+* [install.py](./install.py) -
+  alternate installation script
+
+* [autover.sh](./autover.sh) -
+  tool for changing all version strings
+
 ---
 
 ## Example of the C scraper

@@ -36,7 +36,7 @@ class SysScraper:
 
     def write_files(self):
         """Method that writes/creates bash or ruby files"""
-        sys.stdout.write("  -> Creating task files... ")
+        print("  -> Creating task files...")
         for item in self.file_names:
             try:
                 w_file_name = open(item.next_sibling.text, "w")
@@ -48,11 +48,11 @@ class SysScraper:
                     w_file_name.write("#!/usr/bin/env bash\n")
                 w_file_name.close()
             except (AttributeError, IndexError):
-                sys.stdout.write("[ERROR] Failed to create ")
                 try:
-                    sys.stdout.write("task file %s\n" % item.next_sibling.text)
+                    print("     [ERROR] Failed to create task file {}".format(
+                        item.next_sibling.text
+                    ))
                 except AttributeError:
-                    sys.stdout.write("any task files, tasks do not exist\n")
-                sys.stdout.write("                        ... ")
+                    print("     [ERROR] Failed to create task files.")
                 continue
-        print("done")
+        print("     Done.")
