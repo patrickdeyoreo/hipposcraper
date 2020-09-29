@@ -10,4 +10,4 @@ import hipposcraper  # pylint: disable=import-self
 
 
 if __name__ == '__main__':
-    sys.exit(hipposcraper.main())  # pylint: disable=no-member
+    sys.exit(hipposcraper.hipposcrape())  # pylint: disable=no-member

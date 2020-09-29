@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="hipposcraper",
-    version="2.0.3",
+    version="2.1.0",
     author="Patrick DeYoreo",
     author_email="pdeyoreo@gmail.com",
     description="Create Holberton School project skeletons and documentation.",
@@ -31,10 +31,10 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     entry_points={
         "console_scripts": [
-            "hipposcraper=hipposcraper:main",
+            "hipposcrape=hipposcraper:hipposcrape",
             "hippodoc=hipposcraper:hippodoc",
             "hippodir=hipposcraper:hippodir",
-            "hippocfg=hipposcraper:hippocfg",
+            "hippoconfig=hipposcraper:hippoconfig",
         ],
     },
     install_requires=[

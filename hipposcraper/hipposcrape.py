@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Provides the main entry point for the hipposcraper module."""
+"""
+hipposcrape entry point
+usage: hipposcrape.py URL ...
+"""
 import argparse
 import json
 import sys
@@ -17,10 +20,8 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    """
-    Create the required files and generate a README for each project URL.
-    """
+def hipposcrape():
+    """Create task files and generate a README for each project URL."""
     args = parse_args()
     try:
         user_data = Credentials(load=True)
@@ -40,4 +41,4 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(hipposcrape())
