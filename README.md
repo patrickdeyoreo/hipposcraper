@@ -2,12 +2,6 @@
 
 ## Create Directory Skeletons and READMEs for Holberton School Projects
 
-This repo is currently maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
-Feel welcome to get in touch with any questions, comments, contributions, or
-criticisms. If you would like to contribute, you should totally do that! Check
-out the source code and send me a message (either on Slack or by email), or
-make some changes and submit a pull request.
-
 <p align="center">
   <img src="http://www.holbertonschool.com/holberton-logo.png">
 </p>
@@ -158,12 +152,24 @@ hippoconfig
 
 ---
 
+## Contributing
+
+This repo is currently maintained by [Patrick DeYoreo](github.com/patrickdeyoreo).
+Feel welcome to get in touch with any questions, comments, contributions, or
+criticisms. If you would like to contribute, you should totally do that! Check
+out the source code and send me a message (either on Slack or by email), or
+make some changes and submit a pull request.
+
+---
+
 ## Authors
-* **Derrick Gee** - [kai-dg](https://github.com/kai-dg)
-* **Patrick DeYoreo** - [patrickdeyoreo](https://github.com/patrickdeyoreo)
+
+* **Derrick Gee** - [kai-dg](github.com/kai-dg)
+* **Patrick DeYoreo** - [patrickdeyoreo](github.com/patrickdeyoreo)
 
 ---
 
 ## Contributors
-* **Brennan D Baraban** - [bdbaraban](https://github.com/bdbaraban)
-* **Carlos Daniel Cortez** - [kael1706](https://github.com/kael1706)
+
+* **Brennan D Baraban** - [bdbaraban](github.com/bdbaraban)
+* **Carlos Daniel Cortez** - [kael1706](github.com/kael1706)
