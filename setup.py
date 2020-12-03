@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 setuptools.setup(
     name="hipposcraper",
-    version="2.1.0",
+    version="2.1.1",
     author="Patrick DeYoreo",
     author_email="pdeyoreo@gmail.com",
     description="Create Holberton School project skeletons and documentation.",

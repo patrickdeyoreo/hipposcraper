@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Module for LowScraper"""
 import json
+import os
 import re
 import sys
 
@@ -89,35 +90,37 @@ class LowScraper:
 
             print("  -> Creating header file...")
             try:
-                w_header = open(self.header_name, "w+")
-                w_header.write('#ifndef %s\n' % include_guard)
-                w_header.write('#define %s\n' % include_guard)
-                w_header.write("\n")
-                w_header.write("#include <stdio.h>\n")
-                w_header.write("#include <stdlib.h>\n")
-                w_header.write("\n")
+                find_slash = self.header_name.rfind("/")
+                if find_slash != -1:
+                    header_dir = self.header_name[:find_slash]
+                    os.makedirs(header_dir, mode=0o755, exist_ok=True)
+                with open(self.header_name, "w+") as w_header:
+                    w_header.write('#ifndef %s\n' % include_guard)
+                    w_header.write('#define %s\n' % include_guard)
+                    w_header.write("\n")
+                    w_header.write("#include <stdio.h>\n")
+                    w_header.write("#include <stdlib.h>\n")
+                    w_header.write("\n")
 
-                try:
-                    if self.putchar_check == "_putchar":
-                        w_header.write("int _putchar(char c);\n")
-                except TypeError:
-                    pass
+                    try:
+                        if self.putchar_check == "_putchar":
+                            w_header.write("int _putchar(char c);\n")
+                    except TypeError:
+                        pass
 
-                n = 0
-                for item in self.prototypes_list:
-                    if n == len(self.prototypes_list):
-                        break
-                    w_header.write(self.prototypes_list[n] + ";\n")
-                    n += 1
+                    n = 0
+                    for item in self.prototypes_list:
+                        if n == len(self.prototypes_list):
+                            break
+                        w_header.write(self.prototypes_list[n] + ";\n")
+                        n += 1
 
-                w_header.write("\n")
-                w_header.write('#endif /* %s */' % include_guard)
-                w_header.close()
+                    w_header.write("\n")
+                    w_header.write('#endif /* %s */' % include_guard)
+                    w_header.close()
                 print("     Done.")
             except AttributeError:
                 print("     [ERROR] Failed to create header file.")
-        else:
-            pass
 
     def find_files(self):
         """Method to scrape for C file names"""
@@ -152,22 +155,24 @@ class LowScraper:
                 # Removing string after first comma (multiple file names)
                 find_comma = file_text.find(",")
                 if find_comma != -1:
-                    w_file_name = open(file_text[:find_comma], "w+")
-                else:
-                    w_file_name = open(file_text, "w+")
-
-                if self.header_check != 1:
-                    w_file_name.write('#include "%s"\n\n' % self.header_name)
-                    w_file_name.write("/**\n")
-                    w_file_name.write(" * %s -\n" % func_name)
-                    w_file_name.write(" *\n")
-                    w_file_name.write(" * Return: \n")
-                    w_file_name.write(" */\n")
-                    w_file_name.write("%s\n" % self.prototypes_list[i])
-                    w_file_name.write("{\n")
-                    w_file_name.write("\n")
-                    w_file_name.write("}")
-                    w_file_name.close()
+                    file_text = file_text[:find_comma]
+                find_slash = file_text.rfind("/")
+                if find_slash != -1:
+                    file_dir = file_text[:find_slash]
+                    os.makedirs(file_dir, mode=0o755, exist_ok=True)
+                with open(file_text, "w+") as w_file_name:
+                    if self.header_check != 1:
+                        w_file_name.write('#include "%s"\n\n' % self.header_name)
+                        w_file_name.write("/**\n")
+                        w_file_name.write(" * %s -\n" % func_name)
+                        w_file_name.write(" *\n")
+                        w_file_name.write(" * Return: \n")
+                        w_file_name.write(" */\n")
+                        w_file_name.write("%s\n" % self.prototypes_list[i])
+                        w_file_name.write("{\n")
+                        w_file_name.write("\n")
+                        w_file_name.write("}")
+                        w_file_name.close()
                 i += 1
             except (AttributeError, IndexError):
                 print("     [ERROR] Failed to create task file {}".format(
